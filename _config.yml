@@ -1,0 +1,11 @@
+# In _config.yml
+lsi: false
+safe: true
+source: roy-ananya.github.io
+incremental: false
+highlighter: rouge
+gist:
+  noscript: false
+kramdown:
+  math_engine: mathjax
+  syntax_highlighter: rouge
