@@ -1,7 +1,12 @@
 # In _config.yml
 lsi: false
 safe: true
-source: roy-ananya.github.io
+#source: roy-ananya.github.io
+name: Ananya Roy
+url: roy-ananya.github.io
+enforce_ssl: roy-ananya.github.io
+description: Roy's personal website
+
 incremental: false
 highlighter: rouge
 gist:
