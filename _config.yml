@@ -3,10 +3,10 @@ lsi: false
 safe: true
 #source: roy-ananya.github.io
 name: Ananya Roy
-url: roy-ananya.github.io
+url: # roy-ananya.github.io
 enforce_ssl: roy-ananya.github.io
-description: Roy's personal website
-
+description: 
+#Roy's personal website
 incremental: false
 highlighter: rouge
 gist:
