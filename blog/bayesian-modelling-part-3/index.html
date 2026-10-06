@@ -1,0 +1,2199 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Building a Hierarchical Model in Stan – Ananya Roy — Writing</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-acf12a64177840b8d86f2d4f01b2e9fb.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-b3dda39ca223c1c8a2b382b3a982b632.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+<script src="../theme-sync.js"></script>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../themes.css">
+<link rel="stylesheet" href="../../style.css">
+<link rel="stylesheet" href="../article.css">
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Ananya Roy</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">← Back to portfolio</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/ananyaaroy1"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/ananya-roy-62131220/"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#the-hierarchy-we-are-modelling" id="toc-the-hierarchy-we-are-modelling" class="nav-link active" data-scroll-target="#the-hierarchy-we-are-modelling">The Hierarchy We Are Modelling</a></li>
+  <li><a href="#setup" id="toc-setup" class="nav-link" data-scroll-target="#setup">Setup</a></li>
+  <li><a href="#explore-the-data-to-choose-the-right-parametrization" id="toc-explore-the-data-to-choose-the-right-parametrization" class="nav-link" data-scroll-target="#explore-the-data-to-choose-the-right-parametrization">Explore the data to choose the right parametrization</a></li>
+  <li><a href="#anatomy-of-a-stan-program" id="toc-anatomy-of-a-stan-program" class="nav-link" data-scroll-target="#anatomy-of-a-stan-program">Anatomy of a Stan Program</a></li>
+  <li><a href="#the-data-block-what-we-pass-in" id="toc-the-data-block-what-we-pass-in" class="nav-link" data-scroll-target="#the-data-block-what-we-pass-in">1. The <code>data</code> Block — What We Pass In</a>
+  <ul class="collapse">
+  <li><a href="#a.-dimensions" id="toc-a.-dimensions" class="nav-link" data-scroll-target="#a.-dimensions">1a. Dimensions</a></li>
+  <li><a href="#b.-group-membership-of-each-observation" id="toc-b.-group-membership-of-each-observation" class="nav-link" data-scroll-target="#b.-group-membership-of-each-observation">1b. Group membership of each observation</a></li>
+  <li><a href="#c.-the-hierarchy-itself-children-counts-and-parent-maps" id="toc-c.-the-hierarchy-itself-children-counts-and-parent-maps" class="nav-link" data-scroll-target="#c.-the-hierarchy-itself-children-counts-and-parent-maps">1c. The hierarchy itself — children counts and parent maps</a></li>
+  <li><a href="#d.-targets-and-priors" id="toc-d.-targets-and-priors" class="nav-link" data-scroll-target="#d.-targets-and-priors">1d. Targets and priors</a></li>
+  </ul></li>
+  <li><a href="#the-transformed-data-block-counting-and-pre-computing" id="toc-the-transformed-data-block-counting-and-pre-computing" class="nav-link" data-scroll-target="#the-transformed-data-block-counting-and-pre-computing">2. The <code>transformed data</code> Block — Counting and Pre-computing</a>
+  <ul class="collapse">
+  <li><a href="#a.-how-many-raw-parameters-does-this-tree-need" id="toc-a.-how-many-raw-parameters-does-this-tree-need" class="nav-link" data-scroll-target="#a.-how-many-raw-parameters-does-this-tree-need">2a. How many raw parameters does this tree need?</a></li>
+  <li><a href="#b.-prior-widths-and-the-discount-floor" id="toc-b.-prior-widths-and-the-discount-floor" class="nav-link" data-scroll-target="#b.-prior-widths-and-the-discount-floor">2b. Prior widths and the discount floor</a></li>
+  </ul></li>
+  <li><a href="#non-centered-parameterization-why-raw-parameters" id="toc-non-centered-parameterization-why-raw-parameters" class="nav-link" data-scroll-target="#non-centered-parameterization-why-raw-parameters">3. Non-Centered Parameterization — Why “Raw” Parameters?</a></li>
+  <li><a href="#mu-an-additive-gaussian-parameter" id="toc-mu-an-additive-gaussian-parameter" class="nav-link" data-scroll-target="#mu-an-additive-gaussian-parameter">4. <code>mu</code> — an Additive, Gaussian Parameter</a>
+  <ul class="collapse">
+  <li><a href="#why-the-parents-sd-is-the-childs-prior-scale" id="toc-why-the-parents-sd-is-the-childs-prior-scale" class="nav-link" data-scroll-target="#why-the-parents-sd-is-the-childs-prior-scale">Why the parent’s <code>sd</code> is the child’s prior scale</a></li>
+  <li><a href="#a-worked-shrinkage-example-nokia" id="toc-a-worked-shrinkage-example-nokia" class="nav-link" data-scroll-target="#a-worked-shrinkage-example-nokia">A worked shrinkage example: Nokia</a></li>
+  <li><a href="#and-the-root-itself" id="toc-and-the-root-itself" class="nav-link" data-scroll-target="#and-the-root-itself">And the root itself</a></li>
+  </ul></li>
+  <li><a href="#sigma-and-sd-multiplicative-lognormal-parameters" id="toc-sigma-and-sd-multiplicative-lognormal-parameters" class="nav-link" data-scroll-target="#sigma-and-sd-multiplicative-lognormal-parameters">5. <code>sigma</code> and <code>sd</code> — Multiplicative, Lognormal Parameters</a>
+  <ul class="collapse">
+  <li><a href="#a.-tau-letting-the-data-decide-how-heterogeneous-the-scales-are" id="toc-a.-tau-letting-the-data-decide-how-heterogeneous-the-scales-are" class="nav-link" data-scroll-target="#a.-tau-letting-the-data-decide-how-heterogeneous-the-scales-are">5a. <code>tau</code> — letting the data decide how heterogeneous the scales are</a></li>
+  <li><a href="#b.-the-root-scales" id="toc-b.-the-root-scales" class="nav-link" data-scroll-target="#b.-the-root-scales">5b. The root scales</a></li>
+  </ul></li>
+  <li><a href="#the-parameters-block-what-the-sampler-actually-explores" id="toc-the-parameters-block-what-the-sampler-actually-explores" class="nav-link" data-scroll-target="#the-parameters-block-what-the-sampler-actually-explores">6. The <code>parameters</code> Block — What the Sampler Actually Explores</a></li>
+  <li><a href="#the-transformed-parameters-block-assembling-the-tree" id="toc-the-transformed-parameters-block-assembling-the-tree" class="nav-link" data-scroll-target="#the-transformed-parameters-block-assembling-the-tree">7. The <code>transformed parameters</code> Block — Assembling the Tree</a>
+  <ul class="collapse">
+  <li><a href="#the-counter-scheme" id="toc-the-counter-scheme" class="nav-link" data-scroll-target="#the-counter-scheme">The counter scheme</a></li>
+  <li><a href="#a.-root-level" id="toc-a.-root-level" class="nav-link" data-scroll-target="#a.-root-level">7a. Root level</a></li>
+  <li><a href="#b.-level-1-operating-system" id="toc-b.-level-1-operating-system" class="nav-link" data-scroll-target="#b.-level-1-operating-system">7b. Level 1 — Operating system</a></li>
+  <li><a href="#c.-level-2-device" id="toc-c.-level-2-device" class="nav-link" data-scroll-target="#c.-level-2-device">7c. Level 2 — Device</a></li>
+  <li><a href="#d.-level-3-software-version" id="toc-d.-level-3-software-version" class="nav-link" data-scroll-target="#d.-level-3-software-version">7d. Level 3 — Software version</a></li>
+  <li><a href="#e.-down-to-the-observation" id="toc-e.-down-to-the-observation" class="nav-link" data-scroll-target="#e.-down-to-the-observation">7e. Down to the observation</a></li>
+  </ul></li>
+  <li><a href="#the-model-block-priors" id="toc-the-model-block-priors" class="nav-link" data-scroll-target="#the-model-block-priors">8. The <code>model</code> Block — Priors</a></li>
+  <li><a href="#the-model-block-likelihood" id="toc-the-model-block-likelihood" class="nav-link" data-scroll-target="#the-model-block-likelihood">9. The <code>model</code> Block — Likelihood</a></li>
+  <li><a href="#the-generated-quantities-block-setting-up-for-validation" id="toc-the-generated-quantities-block-setting-up-for-validation" class="nav-link" data-scroll-target="#the-generated-quantities-block-setting-up-for-validation">10. The <code>generated quantities</code> Block — Setting Up for Validation</a></li>
+  <li><a href="#training-the-model" id="toc-training-the-model" class="nav-link" data-scroll-target="#training-the-model">11. Training the Model</a>
+  <ul class="collapse">
+  <li><a href="#deriving-the-hierarchy-arrays" id="toc-deriving-the-hierarchy-arrays" class="nav-link" data-scroll-target="#deriving-the-hierarchy-arrays">Deriving the hierarchy arrays</a></li>
+  <li><a href="#stan-model-input---the-data-dictionary" id="toc-stan-model-input---the-data-dictionary" class="nav-link" data-scroll-target="#stan-model-input---the-data-dictionary">Stan Model Input - the data dictionary</a></li>
+  <li><a href="#sanity-checks" id="toc-sanity-checks" class="nav-link" data-scroll-target="#sanity-checks">Sanity checks</a></li>
+  <li><a href="#compile-and-sample" id="toc-compile-and-sample" class="nav-link" data-scroll-target="#compile-and-sample">Compile and sample</a></li>
+  <li><a href="#run-a-basic-diagnostics-check" id="toc-run-a-basic-diagnostics-check" class="nav-link" data-scroll-target="#run-a-basic-diagnostics-check">Run a Basic Diagnostics Check</a></li>
+  <li><a href="#did-we-recover-the-truth" id="toc-did-we-recover-the-truth" class="nav-link" data-scroll-target="#did-we-recover-the-truth">Did we recover the truth?</a></li>
+  <li><a href="#save-the-fitted-model" id="toc-save-the-fitted-model" class="nav-link" data-scroll-target="#save-the-fitted-model">Save the fitted model</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Building a Hierarchical Model in Stan</h1>
+<p class="subtitle lead">Translating a four-level hierarchy into a Stan model — Part 3</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">bayesian</div>
+    <div class="quarto-category">ml</div>
+    <div class="quarto-category">math</div>
+  </div>
+  </div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">September 2021</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>NOTE: The original post for part 3 was written by me and was not as detailed in its explanations of what each stan block does but I recently tried feeding the model1.6.stan(which was developed in 2021) and asked claude to interpet it. I didn’t expect it to understand and document the underlying model well enough but I was left shocked to see how well it did. Hence this version is much more verbose and detailed in its explanations.</p>
+<p>In <a href="../bayesian-modelling-part-1/index.html">Part 1</a> we built an intuition for Bayesian modelling and why hierarchical (multilevel) models are such a natural fit for grouped, imbalanced data. In <a href="../bayesian-modelling-part-2/index.html">Part 2</a> we simulated a mobile-gaming revenue dataset and explored its data-generating mechanism — and saw first-hand why segments like Nokia (tiny sample size) need to <em>borrow informatin</em> from related segments.</p>
+<p>In this notebook we get to the heart of the matter: <strong>defining and training the actual hierarchical Bayesian model in Stan</strong>.</p>
+<p>We will work with the same business problem introduced before i.e predicting revenue for a mobile gaming company. In part 2, we saw that you have tons of data for iPhone users, but only a handful of data points for Nokia users. How do you make reliable revenue predictions for that sparse Nokia segment without either:</p>
+<ol type="1">
+<li>Ignoring the segment entirely (losing potential insights)</li>
+<li>Making wildly unreliable predictions (overfitting to limited data)</li>
+</ol>
+<p>This is where <strong>hierarchical Bayesian models</strong> shine. They let you “borrow information or strength” from related groups to make smarter predictions where data is limited.</p>
+<p>Hierarchical Bayesian models balance two competing needs:</p>
+<ul>
+<li><strong>When data is abundant</strong>: Trust the actual observations and make group-specific predictions</li>
+<li><strong>When data is scarce</strong>: Lean on broader patterns from parent groups (priors) to guide predictions</li>
+</ul>
+<p>The model automatically determines how much to “borrow” based on data availability. This prevents both overfitting (when you have 2 data points) and underfitting (when you have 2,000 data points).</p>
+<p>We will assume familiarity with STAN going forward.</p>
+<section id="the-hierarchy-we-are-modelling" class="level2">
+<h2 class="anchored" data-anchor-id="the-hierarchy-we-are-modelling">The Hierarchy We Are Modelling</h2>
+<p>Our goal is to predict revenue (install can be predicted as a target similarly but is not done in the current model version) for a mobile app across a hierarchical structure (4-level tree) as shown below.</p>
+<pre><code>Root  →  Operating System  →  Device  →  Software Version  →  (individual customers)</code></pre>
+<ol type="1">
+<li><strong>Root Level</strong> (μ_root, σ_root, sd_root)
+<ul>
+<li>Overall average revenue across all users</li>
+<li>Base variation parameters</li>
+</ul></li>
+<li><strong>Operating System Level</strong> (μ_os, σ_os, sd_os)
+<ul>
+<li>iOS vs Android average revenues</li>
+<li>Inherits from root, adds OS-specific variation</li>
+</ul></li>
+<li><strong>Device Level</strong> (μ_device, σ_device, sd_device)
+<ul>
+<li>Device type averages within each OS</li>
+<li>Inherits from its parent OS</li>
+</ul></li>
+<li><strong>Software Version Level</strong> (μ_sw_version, σ_sw_version)
+<ul>
+<li>Specific version averages</li>
+<li>Inherits from its parent device</li>
+</ul></li>
+</ol>
+<div id="5550a260" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lib.visualizations <span class="im">import</span> HierarchicalGraphViz</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lib.data_helper_utilities <span class="im">import</span> nodes_list, edges_list, nodes_colors</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>HierarchicalGraphViz(nodes_list, edges_list, nodes_colors)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Hierarchy: Root -&gt; OS → Device Type → Software Version -&gt; individual customers '</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-2-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The core modelling idea: <strong>each level’s parameters are drawn from a distribution centered on its parent’s parameters</strong>, thus capturing the hierarchy.</p>
+<p><span class="math display">\mu_{os} \sim \mathcal{N}(\mu_{root},\; sd_{root})</span> <span class="math display">\mu_{device} \sim \mathcal{N}(\mu_{os[parent]},\; sd_{os[parent]})</span> <span class="math display">\mu_{sw\_version} \sim \mathcal{N}(\mu_{device[parent]},\; sd_{device[parent]})</span> <span class="math display">revenue_i \sim \mathcal{N}(\mu_{sw\_version[i]},\; \sigma_{sw\_version[i]})</span></p>
+<p>At every level of the tree we track three kinds of parameters. The distinction between the parameters:</p>
+<ul>
+<li><strong>mu (μ)</strong> models “What is the average revenue for this group?”</li>
+<li><strong>sigma (σ)</strong> models “How much do <em>individual customers</em> inside this group differ from its mean?” (applied across the rows in the data and captures within-group variations)</li>
+<li><strong>sd</strong> models “How much do this group’s <em>child groups</em> differ from each other?” (captures across-group variations)</li>
+</ul>
+<p>This structure is what produces <strong>partial pooling</strong>: a segment with lots of data (ex-Samsung) is dominated by its own observations, while a sparse segment (Nokia) gets pulled toward its parent’s mean. The amount of shrinkage is governed by the <code>sd</code> parameters — and the model learns those from the data too.</p>
+</section>
+<section id="setup" class="level2">
+<h2 class="anchored" data-anchor-id="setup">Setup</h2>
+<p>One piece of housekeeping before anything else. PyStan 2 is end-of-life and predates Apple Silicon; on recent macOS a stock <code>pystan.StanModel(...)</code> call either fails to compile or hard-crashes the interpreter with SIGBUS the moment it imports the freshly built model. The block below works around it by compiling with conda’s older clang while linking with the <em>system</em> linker and exporting only the <code>PyInit_*</code> symbol, so the model’s weak C++ symbols cannot collide with the ones PyStan already loaded.</p>
+<p>In part2, we had generated the following simulated datasets - <code>extra_small</code>,<code>small</code>,<code>medium</code> and <code>large</code> of varying sizes. For model training, we will use the <code>small</code> dataset since it’s faster to train and better illustrates the issues we see with some groups having scarce datapoints.</p>
+<div id="e5666e37" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">###################################################################</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">### macOS / Apple Silicon build fix - must precede `import pystan`,</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">### which `helper_utilities` does at module level.</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">###################################################################</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sys</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> tempfile</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>CONDA_PREFIX <span class="op">=</span> os.environ.get(<span class="st">"CONDA_PREFIX"</span>)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> CONDA_PREFIX, <span class="st">"stan_env is not activated - launch Jupyter from an activated stan_env shell"</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>_exports <span class="op">=</span> os.path.join(tempfile.gettempdir(), <span class="st">"pyinit_exports.txt"</span>)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(_exports, <span class="st">"w"</span>) <span class="im">as</span> f:</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    f.write(<span class="st">"_PyInit_*</span><span class="ch">\n</span><span class="st">"</span>)</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>os.environ[<span class="st">"CC"</span>]  <span class="op">=</span> <span class="ss">f"</span><span class="sc">{</span>CONDA_PREFIX<span class="sc">}</span><span class="ss">/bin/arm64-apple-darwin20.0.0-clang"</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>os.environ[<span class="st">"CXX"</span>] <span class="op">=</span> <span class="ss">f"</span><span class="sc">{</span>CONDA_PREFIX<span class="sc">}</span><span class="ss">/bin/arm64-apple-darwin20.0.0-clang++"</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>os.environ[<span class="st">"LDSHARED"</span>] <span class="op">=</span> (<span class="st">"/usr/bin/clang -bundle -undefined dynamic_lookup "</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>                          <span class="ss">f"-Wl,-exported_symbols_list,</span><span class="sc">{</span>_exports<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="co">### PyStan 2 multi-chain sampling needs 'fork', not 'spawn'</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> multiprocessing</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> multiprocessing.get_start_method(allow_none<span class="op">=</span><span class="va">True</span>) <span class="op">!=</span> <span class="st">"fork"</span>:</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>    multiprocessing.set_start_method(<span class="st">"fork"</span>, force<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pickle</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> helper_utilities <span class="im">as</span> helper   <span class="co"># this imports pystan</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a><span class="co">###################################################################</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a><span class="co">### Loading the Simulated Dataset (generated in Part 2)</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a><span class="co">###################################################################</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>country_weights <span class="op">=</span> {</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>    <span class="st">'US'</span>: <span class="fl">0.2</span>,</span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>    <span class="st">'UK'</span>: <span class="fl">0.15</span>,</span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>    <span class="st">'India'</span>: <span class="fl">0.35</span>,</span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>    <span class="st">'China'</span>: <span class="fl">0.23</span>,</span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Russia'</span>: <span class="fl">0.11</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">12345678</span>)</span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>configurations_filepath <span class="op">=</span> <span class="st">"&lt;your_config_path&gt;"</span></span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>configs <span class="op">=</span> helper.get_configs(configurations_filepath <span class="op">+</span> <span class="st">'configs.yaml'</span>)</span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>sim_df  <span class="op">=</span> pd.read_csv(configs[<span class="st">'input_data_filepath'</span>] <span class="op">+</span> <span class="st">'simulated_data_small.csv'</span>)</span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Shape of simulated dataset = </span><span class="sc">{}</span><span class="st">"</span>.<span class="bu">format</span>(sim_df.shape))</span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a>sim_df.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Shape of simulated dataset = (1000, 12)</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="2">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">country</th>
+<th data-quarto-table-cell-role="th">os</th>
+<th data-quarto-table-cell-role="th">device_type</th>
+<th data-quarto-table-cell-role="th">software_version</th>
+<th data-quarto-table-cell-role="th">discount</th>
+<th data-quarto-table-cell-role="th">install</th>
+<th data-quarto-table-cell-role="th">revenue</th>
+<th data-quarto-table-cell-role="th">country_index</th>
+<th data-quarto-table-cell-role="th">id_index</th>
+<th data-quarto-table-cell-role="th">os_index</th>
+<th data-quarto-table-cell-role="th">device_type_index</th>
+<th data-quarto-table-cell-role="th">software_version_index</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>UK</td>
+<td>ios</td>
+<td>ipad</td>
+<td>i10.0.1</td>
+<td>57.222006</td>
+<td>0.0</td>
+<td>381.480041</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>2</td>
+<td>4</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>India</td>
+<td>android</td>
+<td>samsung</td>
+<td>s1.3</td>
+<td>380.925688</td>
+<td>1.0</td>
+<td>1088.359109</td>
+<td>2</td>
+<td>2</td>
+<td>2</td>
+<td>3</td>
+<td>8</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>India</td>
+<td>ios</td>
+<td>iphone</td>
+<td>i1.0.3</td>
+<td>886.821518</td>
+<td>1.0</td>
+<td>2533.775767</td>
+<td>2</td>
+<td>3</td>
+<td>1</td>
+<td>1</td>
+<td>3</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>India</td>
+<td>android</td>
+<td>samsung</td>
+<td>s1.4</td>
+<td>466.772456</td>
+<td>0.0</td>
+<td>1333.635588</td>
+<td>2</td>
+<td>4</td>
+<td>2</td>
+<td>3</td>
+<td>9</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>US</td>
+<td>android</td>
+<td>samsung</td>
+<td>s1.3</td>
+<td>198.276403</td>
+<td>0.0</td>
+<td>991.382013</td>
+<td>3</td>
+<td>5</td>
+<td>2</td>
+<td>3</td>
+<td>8</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="explore-the-data-to-choose-the-right-parametrization" class="level2">
+<h2 class="anchored" data-anchor-id="explore-the-data-to-choose-the-right-parametrization">Explore the data to choose the right parametrization</h2>
+<p>It’s best to use the data to define the parametrizations and priors. Almost every design decision below is a response to a specific feature of this dataset, and the fastest way to understand the model is to see those features first.</p>
+<p>Two questions decide the shape of the model:</p>
+<ol type="1">
+<li><strong>How much do individual customers vary within a group?</strong> → this is what <code>sigma</code> has to be able to express.</li>
+</ol>
+<div id="40b98007" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">### 1. WITHIN-group spread -&gt; what sigma must be able to express</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>within <span class="op">=</span> (sim_df</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>          .groupby([<span class="st">'os'</span>, <span class="st">'device_type'</span>, <span class="st">'software_version'</span>])[<span class="st">'revenue'</span>]</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>          .agg(n<span class="op">=</span><span class="st">'count'</span>, group_mean<span class="op">=</span><span class="st">'mean'</span>, within_sd<span class="op">=</span><span class="st">'std'</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>          .<span class="bu">round</span>(<span class="dv">1</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>          .sort_values(<span class="st">'within_sd'</span>))</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Within-software-version spread (this is sigma_sw_version):"</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(within, <span class="st">"</span><span class="ch">\n</span><span class="st">"</span>)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>observed <span class="op">=</span> within[<span class="st">'within_sd'</span>].dropna()</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  smallest within-group sd : </span><span class="sc">{</span>observed<span class="sc">.</span><span class="bu">min</span>()<span class="sc">:.1f}</span><span class="ss">"</span>)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  largest  within-group sd : </span><span class="sc">{</span>observed<span class="sc">.</span><span class="bu">max</span>()<span class="sc">:.1f}</span><span class="ss">"</span>)</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  ratio largest/smallest   : </span><span class="sc">{</span>observed<span class="sc">.</span><span class="bu">max</span>() <span class="op">/</span> observed<span class="sc">.</span><span class="bu">min</span>()<span class="sc">:.1f}</span><span class="ss">x</span><span class="ch">\n</span><span class="ss">"</span>)</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Within-software-version spread (this is sigma_sw_version):
+                                        n  group_mean  within_sd
+os      device_type software_version                            
+ios     ipad        i10.0.2            87       487.2       90.8
+android huawei      h2.2.1             77       895.7       95.1
+        nokia       n1.1               16       464.9      103.0
+        huawei      h2.3               80       911.7      109.5
+ios     ipad        i10.0.1            70       486.0      110.4
+android samsung     s1.1               21      1120.9      186.8
+                    s1.4              210      1209.6      196.4
+                    s1.3              153      1194.8      207.3
+                    s1.2               53      1151.2      212.9
+ios     iphone      i1.0.2             78      1997.5      367.4
+                    i1.0.3            123      2018.0      423.3
+                    i1.0.1             32      2021.6      449.0 
+
+  smallest within-group sd : 90.8
+  largest  within-group sd : 449.0
+  ratio largest/smallest   : 4.9x
+</code></pre>
+</div>
+</div>
+<p>The above table shows significant within-group spread. That is an <strong>4.9× ratio</strong> between the tightest and loosest group which means <code>sigma_sw_version</code> has to be able to span that range.</p>
+<ol start="2" type="1">
+<li><strong>How much do sibling groups differ from each other?</strong> → this is what <code>sd</code> has to be able to express.</li>
+</ol>
+<div id="6815e8b9" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">### 2. BETWEEN-sibling spread -&gt; what sd must be able to express</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>version_means <span class="op">=</span> sim_df.groupby([<span class="st">'device_type'</span>, <span class="st">'software_version'</span>])[<span class="st">'revenue'</span>].mean()</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>between_versions <span class="op">=</span> version_means.groupby(<span class="st">'device_type'</span>).agg([<span class="st">'count'</span>,<span class="st">'mean'</span>, <span class="st">'std'</span>]).<span class="bu">round</span>(<span class="dv">1</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>between_versions.columns <span class="op">=</span> [<span class="st">'n_versions'</span>, <span class="st">'mean_versions'</span>,<span class="st">'sd_of_version_means'</span>]</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Spread of software-version means within each device (this is sd_device):"</span>)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(between_versions, <span class="st">"</span><span class="ch">\n</span><span class="st">"</span>)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>device_means <span class="op">=</span> sim_df.groupby([<span class="st">'os'</span>, <span class="st">'device_type'</span>])[<span class="st">'revenue'</span>].mean()</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>between_devices <span class="op">=</span> device_means.groupby(<span class="st">'os'</span>).agg([<span class="st">'count'</span>,<span class="st">'mean'</span>, <span class="st">'std'</span>]).<span class="bu">round</span>(<span class="dv">1</span>)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>between_devices.columns <span class="op">=</span> [<span class="st">'n_devices'</span>, <span class="st">'mean_vdevice'</span>,<span class="st">'sd_of_device_means'</span>]</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Spread of device means within each OS (this is sd_os):"</span>)</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(between_devices)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Spread of software-version means within each device (this is sd_device):
+             n_versions  mean_versions  sd_of_version_means
+device_type                                                
+huawei                2          903.7                 11.3
+ipad                  2          486.6                  0.8
+iphone                3         2012.4                 13.0
+nokia                 1          464.9                  NaN
+samsung               4         1169.1                 40.6 
+
+Spread of device means within each OS (this is sd_os):
+         n_devices  mean_vdevice  sd_of_device_means
+os                                                  
+android          3         853.9               366.6
+ios              2        1249.1              1078.3</code></pre>
+</div>
+</div>
+<p>Clearly, between-sibling spread varies even more.</p>
+<p>These observations will dictate the choice of <code>sigma</code> and <code>sd</code> in the stan model.</p>
+</section>
+<section id="anatomy-of-a-stan-program" class="level2">
+<h2 class="anchored" data-anchor-id="anatomy-of-a-stan-program">Anatomy of a Stan Program</h2>
+<p>A Stan program is organized into named blocks, each with a specific job and a specific execution frequency during sampling. Understanding <em>when</em> each block runs explains a lot of the design decisions we’ll see:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Block</th>
+<th>Purpose</th>
+<th>When it runs</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>data</code></td>
+<td>Declares everything passed in from Python</td>
+<td>Read <strong>once</strong>, before sampling</td>
+</tr>
+<tr class="even">
+<td><code>transformed data</code></td>
+<td>Deterministic pre-computation on the data</td>
+<td>Computed <strong>once</strong>, before sampling</td>
+</tr>
+<tr class="odd">
+<td><code>parameters</code></td>
+<td>The unknowns the sampler explores</td>
+<td>Sampled at <strong>every</strong> step</td>
+</tr>
+<tr class="even">
+<td><code>transformed parameters</code></td>
+<td>Deterministic functions of parameters (and data)</td>
+<td>Re-computed at <strong>every</strong> step</td>
+</tr>
+<tr class="odd">
+<td><code>model</code></td>
+<td>Defines the log-posterior: priors + likelihood</td>
+<td>Evaluated at <strong>every</strong> step</td>
+</tr>
+<tr class="even">
+<td><code>generated quantities</code></td>
+<td>Derived values and random draws</td>
+<td>Once <strong>per retained draw</strong>, after sampling</td>
+</tr>
+</tbody>
+</table>
+<p>Let’s first look at the whole model file, then take it apart block by block. <code>model1.6.stan</code> defines the full model.</p>
+<div id="a8451bfe" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">'stan_models/model1.6.stan'</span>) <span class="im">as</span> f:</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    stan_code <span class="op">=</span> f.read()</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, line <span class="kw">in</span> <span class="bu">enumerate</span>(stan_code.splitlines(), start<span class="op">=</span><span class="dv">1</span>):</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>i<span class="sc">:3d}</span><span class="ss">| </span><span class="sc">{</span>line<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  1| // model1.6.stan
+  2| data{
+  3|     //// Passing Data Dimensions/Sizes
+  4|     int&lt;lower=10&gt;   num_samples;
+  5|     int&lt;lower=1&gt;    num_customers; // is same as num_samples
+  6|     int&lt;lower=1&gt;    num_os; //number of types of operating system
+  7|     int&lt;lower=1&gt;    num_devices; //number of types of devices
+  8|     int&lt;lower=1&gt;    num_software_versions; //number of types of software versions
+  9|     int&lt;lower=1&gt;    num_countries; // number of countries
+ 10| 
+ 11|     //// Passing Data elements to model
+ 12|     int&lt;lower=1, upper=num_os&gt;                os[num_samples]; // operating system column
+ 13|     int&lt;lower=1, upper=num_devices&gt;           device_type[num_samples]; // device_type column
+ 14|     int&lt;lower=1, upper=num_software_versions&gt; software_version[num_samples]; // software_version column
+ 15|     int&lt;lower=1, upper=num_countries&gt;         country[num_samples]; // country column
+ 16| 
+ 17|     //// Hierarchy data
+ 18|     // Children in the tree hierarchy
+ 19|     int&lt;lower=1, upper=num_devices&gt;           os_children[num_os]; // l0(os) children-&gt;l1(device)
+ 20|     int&lt;lower=1, upper=num_software_versions&gt; device_children[num_devices]; // l1(device) children-&gt;l2(sw_version)
+ 21|     int&lt;lower=1, upper=num_customers&gt;         sw_version_children[num_software_versions]; // l2(sw) children-&gt;customers
+ 22| 
+ 23|     // Parent
+ 24|     int&lt;lower=1, upper=num_os&gt;        device_parent[num_devices];
+ 25|     int&lt;lower=1, upper=num_devices&gt;   sw_version_parent[num_software_versions];
+ 26| 
+ 27|     //// Passing Target Revenue
+ 28|     vector&lt;lower=0&gt;[num_samples] revenue;  // revenue 
+ 29|     vector&lt;lower=0&gt;[num_samples] discount;
+ 30|     int&lt;lower=0, upper=1&gt; install[num_samples]; // whether game was installed or not
+ 31| 
+ 32|     //Passing Priors
+ 33|     real LOCATION_mu_root;
+ 34|     real&lt;lower=0&gt; SCALE_mu_root;
+ 35|     real&lt;lower=0&gt; SCALE_sd_root;                 // scale of between groups variation at root
+ 36|     real&lt;lower=0&gt; SCALE_sigma_root;              // scale of within groups variation at root
+ 37|     real&lt;lower=0.05&gt; SCALE_beta_country;
+ 38| }
+ 39| 
+ 40| transformed data{
+ 41|     int length_mu_raw_params; // length of raw mu params
+ 42|     int length_sigma_raw_params; // length of raw sigma params
+ 43|     int length_sd_raw_params; // length of raw sd params
+ 44| 
+ 45|     // Hyper-prior widths. These are on the LOG scale, i.e. sigma_root has a
+ 46|     // lognormal(log(SCALE_sigma_root), PRIOR_LOG_SCALE_ROOT) prior, so a value
+ 47|     // of 0.7 means "the root scale is within a factor of ~4 of SCALE_sigma_root
+ 48|     // with 95% probability".
+ 49|     real PRIOR_LOG_SCALE_ROOT;   // width of the lognormal prior on the root scales
+ 50|     real PRIOR_SCALE_TAU;        // half-normal scale on the level-to-level spread
+ 51|     real&lt;lower=0&gt; MIN_SIGMA_DISC; // floor on the discount residual sd 
+ 52| 
+ 53|     PRIOR_LOG_SCALE_ROOT = 0.7;
+ 54|     PRIOR_SCALE_TAU      = 0.5;
+ 55| 
+ 56|     // In the current simulation discount == country_weight * revenue EXACTLY
+ 57|     // (zero noise), so beta_country can drive every discount residual to 0 and
+ 58|     // the likelihood sigma^-N is unbounded as sigma -&gt; 0. Without a floor the
+ 59|     // sampler collapses the step size and the chains freeze. This floor says
+ 60|     // "we do not claim to resolve the discount to better than 2% of its own
+ 61|     // spread". In future iteration of the simulation, we can addgenuine noise,
+ 62|     // then we can set something negligible (e.g. 1e-6) and let the data speak.
+ 63|     MIN_SIGMA_DISC = 0.02 * sd(discount);
+ 64| 
+ 65|     length_mu_raw_params    = 1;
+ 66|     length_sigma_raw_params = 1;
+ 67|     length_sd_raw_params    = 1;
+ 68|     // Covers first layer of the hierarchy i.e @os level
+ 69|     if(num_os&gt;1){
+ 70|         length_mu_raw_params    = length_mu_raw_params + num_os;
+ 71|         length_sigma_raw_params = length_sigma_raw_params + num_os;
+ 72|         length_sd_raw_params    = length_sd_raw_params + num_os;
+ 73|     }
+ 74|     // Covers second layer of the hierarchy i.e @device_type level
+ 75|     // for each os - ios /android, if children&gt;1, each child i.e device will have a mu/sigma/sd param
+ 76|     for(n in 1:num_os){
+ 77|         if(os_children[n]&gt;1){
+ 78|             length_mu_raw_params    = length_mu_raw_params + os_children[n];
+ 79|             length_sigma_raw_params = length_sigma_raw_params + os_children[n];
+ 80|             length_sd_raw_params    = length_sd_raw_params + os_children[n];
+ 81|         }
+ 82|     }
+ 83|     // Covers third layer of the hierarchy i.e @software_version level
+ 84|     // for each software version, if the parent device has multiple software versions and if software version has multiple children
+ 85|     for(n in 1:num_software_versions){
+ 86|         int parent;
+ 87|         parent = sw_version_parent[n];
+ 88|         if(sw_version_children[n]&gt;1 &amp;&amp; device_children[parent]&gt;1){
+ 89|             length_mu_raw_params    = length_mu_raw_params + 1;
+ 90|             length_sigma_raw_params = length_sigma_raw_params + 1;
+ 91|         }
+ 92|     }
+ 93| }
+ 94| 
+ 95| parameters{
+ 96|     // Hierarchical relationship params. ALL of these are now unconstrained
+ 97|     // standard-normal z-scores 
+ 98|     vector[length_mu_raw_params]    mu_raw;
+ 99|     vector[length_sigma_raw_params] sigma_raw; // z-scores for log(sigma)
+100|     vector[length_sd_raw_params]    sd_raw;    // z-scores for log(sd)
+101| 
+102|     // How much a scale is allowed to move from one level of the tree to the
+103|     // next. tau -&gt; 0 means "all groups share the parent's scale"; the data
+104|     // decide how much heterogeneity there is instead of a hard [1, 1.25] wall.
+105|     real&lt;lower=0&gt; tau_sigma;
+106|     real&lt;lower=0&gt; tau_sd;
+107| 
+108|     // Discount regression
+109|     vector&lt;lower=0&gt;[num_countries] beta_country;
+110|     real&lt;lower=MIN_SIGMA_DISC&gt; sigma_disc_error;
+111| }
+112| 
+113| transformed parameters{
+114|     /// Root params
+115|     real mu_root;
+116|     real&lt;lower=0&gt; sigma_root;
+117|     real&lt;lower=0&gt; sd_root;
+118| 
+119|     vector[num_os] mu_os;
+120|     vector&lt;lower=0&gt;[num_os] sd_os; // variation among devicew in an os
+121|     vector&lt;lower=0&gt;[num_os] sigma_os;
+122| 
+123|     vector[num_devices] mu_device;
+124|     vector&lt;lower=0&gt;[num_devices] sd_device;
+125|     vector&lt;lower=0&gt;[num_devices] sigma_device;
+126| 
+127|     vector[num_software_versions] mu_sw_version;
+128|     vector&lt;lower=0&gt;[num_software_versions] sigma_sw_version;
+129| 
+130|     vector[num_customers] revenue_hierarchy; // expected revenue for each customer
+131|     vector[num_customers] sigma_revenue;     // sd of revenue for each customer
+132| 
+133|     {
+134|         int ctr_mu; // counter for mu
+135|         int ctr_sd; // counter for sd
+136|         int parent_idx; // parent's index in the hierarchy
+137|         ctr_mu = 1;
+138|         ctr_sd = 1;
+139| 
+140|         /// Root level of tree
+141|         mu_root    = LOCATION_mu_root + SCALE_mu_root * mu_raw[ctr_mu];
+142|         // lognormal, centred on the scale the user supplies, but free to move
+143|         // an order of magnitude in either direction.
+144|         sigma_root = SCALE_sigma_root * exp(PRIOR_LOG_SCALE_ROOT * sigma_raw[ctr_mu]);
+145|         sd_root    = SCALE_sd_root    * exp(PRIOR_LOG_SCALE_ROOT * sd_raw[ctr_sd]);
+146|         ctr_mu = ctr_mu + 1;
+147|         ctr_sd = ctr_sd + 1;
+148| 
+149|         /// First Layer of Hierarchy - operating system
+150|         for( i in 1:num_os ){
+151|             if(num_os&gt;1){
+152|                 mu_os[i]    = mu_root + sd_root * mu_raw[ctr_mu];
+153|                 // multiplicative, but exp(tau*z) can be &lt; 1 as well as &gt; 1
+154|                 sigma_os[i] = sigma_root * exp(tau_sigma * sigma_raw[ctr_mu]);
+155|                 sd_os[i]    = sd_root    * exp(tau_sd    * sd_raw[ctr_sd]);
+156|                 ctr_mu = ctr_mu + 1;
+157|                 ctr_sd = ctr_sd + 1;
+158|             }else{
+159|                 mu_os[i]    = mu_root;
+160|                 sigma_os[i] = sigma_root;
+161|                 sd_os[i]    = sd_root;
+162|             }
+163|         }
+164|         /// Second Layer of Hierarchy - devices
+165|         for( i in 1:num_devices){
+166|             parent_idx = device_parent[i]; // the parent of device in the hierarchy is the operating system
+167|             if(os_children[parent_idx]&gt;1){
+168|                 mu_device[i]    = mu_os[parent_idx] + sd_os[parent_idx] * mu_raw[ctr_mu];
+169|                 sigma_device[i] = sigma_os[parent_idx] * exp(tau_sigma * sigma_raw[ctr_mu]);
+170|                 sd_device[i]    = sd_os[parent_idx]    * exp(tau_sd    * sd_raw[ctr_sd]);
+171|                 ctr_mu = ctr_mu + 1;
+172|                 ctr_sd = ctr_sd + 1;
+173|             }else{
+174|                 mu_device[i]    = mu_os[parent_idx];
+175|                 sigma_device[i] = sigma_os[parent_idx];
+176|                 sd_device[i]    = sd_os[parent_idx];
+177|             }
+178|         }
+179|         /// Third Layer of Hierarchy - software versions
+180|         for( i in 1:num_software_versions){
+181|             parent_idx = sw_version_parent[i]; // the parent of software versions in the hierarchy is devices
+182|             if(device_children[parent_idx]&gt;1 &amp;&amp; sw_version_children[i]&gt;1 ){
+183|                 mu_sw_version[i]    = mu_device[parent_idx] + sd_device[parent_idx] * mu_raw[ctr_mu];
+184|                 sigma_sw_version[i] = sigma_device[parent_idx] * exp(tau_sigma * sigma_raw[ctr_mu]);
+185|                 ctr_mu = ctr_mu + 1;
+186|             }else{
+187|                 mu_sw_version[i]    = mu_device[parent_idx];
+188|                 sigma_sw_version[i] = sigma_device[parent_idx];
+189|             }
+190|         }
+191|     }
+192| 
+193|     // NOTE: revenue_hierarchy is now the EXPECTED revenue of the group a
+194|     // customer belongs to, not a free per-customer latent draw
+195|     revenue_hierarchy = mu_sw_version[software_version];
+196|     sigma_revenue     = sigma_sw_version[software_version];
+197| }
+198| 
+199| model{
+200|     // PRIORS
+201|     mu_raw    ~ normal(0,1);
+202|     sigma_raw ~ normal(0,1);   // =&gt; lognormal priors on sigma_root/os/device/sw
+203|     sd_raw    ~ normal(0,1);   // =&gt; lognormal priors on sd_root/os/device
+204| 
+205|     tau_sigma ~ normal(0, PRIOR_SCALE_TAU); // half-normal (lower=0 in decl.)
+206|     tau_sd    ~ normal(0, PRIOR_SCALE_TAU);
+207| 
+208|     beta_country ~ lognormal(log(0.25 * SCALE_beta_country), 0.5);
+209| 
+210|     // Half-normal on the excess above the floor. With noiseless discount data
+211|     // the posterior simply piles up at MIN_SIGMA_DISC, which is a clean
+212|     // exponential tail in the unconstrained space rather than a funnel.
+213|     sigma_disc_error ~ normal(MIN_SIGMA_DISC, 0.5 * sd(discount));
+214| 
+215|     // LIKELIHOOD
+216|     target += normal_lpdf( revenue  | revenue_hierarchy, sigma_revenue );
+217|     target += normal_lpdf( discount | beta_country[country] .* revenue, sigma_disc_error );
+218| }
+219| 
+220| generated quantities{
+221|     vector[num_samples] log_lik;      // for loo / waic in the evaluation notebook
+222|     vector[num_samples] revenue_rep;  // posterior predictive draws
+223| 
+224|     for(n in 1:num_samples){
+225|         log_lik[n] = normal_lpdf(revenue[n]  | revenue_hierarchy[n], sigma_revenue[n])
+226|                    + normal_lpdf(discount[n] | beta_country[country[n]] * revenue[n], sigma_disc_error);
+227|         revenue_rep[n] = normal_rng(revenue_hierarchy[n], sigma_revenue[n]);
+228|     }
+229| }</code></pre>
+</div>
+</div>
+</section>
+<section id="the-data-block-what-we-pass-in" class="level2">
+<h2 class="anchored" data-anchor-id="the-data-block-what-we-pass-in">1. The <code>data</code> Block — What We Pass In</h2>
+<p>The <code>data</code> block declares every input the model needs. It has four logical sections:</p>
+<section id="a.-dimensions" class="level3">
+<h3 class="anchored" data-anchor-id="a.-dimensions">1a. Dimensions</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">10</span>&gt;   num_samples;</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt;    num_customers;          <span class="co">// same as num_samples</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt;    num_os;                 <span class="co">// number of operating systems</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt;    num_devices;            <span class="co">// number of device types</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt;    num_software_versions;  <span class="co">// number of software versions</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt;    num_countries;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Stan needs to know all array sizes up front. The <code>&lt;lower=...&gt;</code> constraints act as free sanity checks — Stan will refuse to run if, say, <code>num_samples &lt; 10</code>.</p>
+</section>
+<section id="b.-group-membership-of-each-observation" class="level3">
+<h3 class="anchored" data-anchor-id="b.-group-membership-of-each-observation">1b. Group membership of each observation</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>, <span class="kw">upper</span>=num_os&gt;                os[num_samples];</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>, <span class="kw">upper</span>=num_devices&gt;           device_type[num_samples];</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>, <span class="kw">upper</span>=num_software_versions&gt; software_version[num_samples];</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>, <span class="kw">upper</span>=num_countries&gt;         country[num_samples];</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Each categorical column is passed as an integer index array (Stan is 1-indexed — the Python side maps <code>'ios' → 1</code>, <code>'android' → 2</code>, etc.). These arrays tell the model which OS / device / software version / country each observation belongs to, and later let us do vectorized lookups like <code>mu_sw_version[software_version]</code>.</p>
+</section>
+<section id="c.-the-hierarchy-itself-children-counts-and-parent-maps" class="level3">
+<h3 class="anchored" data-anchor-id="c.-the-hierarchy-itself-children-counts-and-parent-maps">1c. The hierarchy itself — children counts and parent maps</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Children counts</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>, <span class="kw">upper</span>=num_devices&gt;           os_children[num_os];</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>, <span class="kw">upper</span>=num_software_versions&gt; device_children[num_devices];</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>, <span class="kw">upper</span>=num_customers&gt;         sw_version_children[num_software_versions];</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="co">// Parent maps</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>, <span class="kw">upper</span>=num_os&gt;        device_parent[num_devices];</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>, <span class="kw">upper</span>=num_devices&gt;   sw_version_parent[num_software_versions];</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This is how the <strong>tree structure</strong> enters the model — Stan has no built-in notion of a hierarchy, so we nee to encode it explicitly with two kinds of arrays: - <strong><code>*_children[i]</code></strong> — how many children node <code>i</code> has one level down. E.g. <code>os_children = {2, 3}</code> says iOS has 2 devices (iphone, ipad) and Android has 3 (samsung, huawei, nokia). - <strong><code>*_parent[i]</code></strong> — the index of node <code>i</code>’s parent one level up. E.g. <code>device_parent = {1, 1, 2, 2, 2}</code> says devices 1–2 belong to OS 1 and devices 3–5 to OS 2.</p>
+<p>The parent maps are used to <em>inherit</em> parameters down the tree; the children counts are used to decide when a level should <em>collapse</em>.</p>
+</section>
+<section id="d.-targets-and-priors" class="level3">
+<h3 class="anchored" data-anchor-id="d.-targets-and-priors">1d. Targets and priors</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="dt">vector</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt;[num_samples] revenue;</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="dt">vector</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt;[num_samples] discount;</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=<span class="dv">1</span>&gt; install[num_samples];   <span class="co">// passed in, but unused</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span> LOCATION_mu_root;</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; SCALE_mu_root;</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; SCALE_sd_root;     <span class="co">// scale of BETWEEN-group variation at the root</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; SCALE_sigma_root;  <span class="co">// scale of WITHIN-group variation at the root</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="fl">0.05</span>&gt; SCALE_beta_country;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>We model two outcomes jointly: <code>revenue</code> and <code>discount</code> (<code>install</code> is carried along for future model versions but is not used in the likelihood).</p>
+<p>Note that the <em>prior hyperparameters are passed as data</em> rather than hard-coded. This is a deliberate design choice: you can rerun the model with different priors (e.g.&nbsp;for a prior-sensitivity analysis) <em>without recompiling</em> the Stan model — compilation takes tens of seconds, sampling with new data starts immediately.</p>
+</section>
+</section>
+<section id="the-transformed-data-block-counting-and-pre-computing" class="level2">
+<h2 class="anchored" data-anchor-id="the-transformed-data-block-counting-and-pre-computing">2. The <code>transformed data</code> Block — Counting and Pre-computing</h2>
+<p>This block runs <strong>once</strong>, before sampling, and does two jobs.</p>
+<section id="a.-how-many-raw-parameters-does-this-tree-need" class="level3">
+<h3 class="anchored" data-anchor-id="a.-how-many-raw-parameters-does-this-tree-need">2a. How many raw parameters does this tree need?</h3>
+<p>The parameter count depends on the shape of the tree, and — crucially — on the <strong>collapsing rule</strong> we implement in <code>transformed parameters</code>:</p>
+<blockquote class="blockquote">
+<p><em>If a parent has only one child, that child gets no parameters of its own — it inherits its parent’s values exactly.</em></p>
+</blockquote>
+<p>You cannot estimate <em>between-group variation</em> from a single group member (there is no “between”). Giving a lone child its own free parameter would make the model <strong>non-identifiable</strong>: the data could not distinguish the parent’s value from the child’s offset. So single children are collapsed onto their parents, and we do not allocate raw parameters for them.</p>
+<p>In our data, Nokia has exactly one software version (<code>n1.1</code>). Without collapsing, we would be asking the model to estimate a mean, a within-group spread and a between-version spread from a single number.</p>
+<p>The block walks the tree level by level, incrementing three length counters:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>    length_mu_raw_params    = <span class="dv">1</span>;</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    length_sigma_raw_params = <span class="dv">1</span>;</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    length_sd_raw_params    = <span class="dv">1</span>;</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Covers first layer of the hierarchy i.e @os level</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(num_os&gt;<span class="dv">1</span>){</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>        length_mu_raw_params    = length_mu_raw_params + num_os;</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>        length_sigma_raw_params = length_sigma_raw_params + num_os;</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>        length_sd_raw_params    = length_sd_raw_params + num_os;</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Covers second layer of the hierarchy i.e @device_type level</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// for each os - ios /android, if children&gt;1, each child i.e device will have a mu/sigma/sd param</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span>(n <span class="cf">in</span> <span class="dv">1</span>:num_os){</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span>(os_children[n]&gt;<span class="dv">1</span>){</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>            length_mu_raw_params    = length_mu_raw_params + os_children[n];</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>            length_sigma_raw_params = length_sigma_raw_params + os_children[n];</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>            length_sd_raw_params    = length_sd_raw_params + os_children[n];</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Covers third layer of the hierarchy i.e @software_version level</span></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>    <span class="co">// for each software version, if the parent device has multiple software versions and if software version has multiple children</span></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span>(n <span class="cf">in</span> <span class="dv">1</span>:num_software_versions){</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>        <span class="dt">int</span> parent;</span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>        parent = sw_version_parent[n];</span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span>(sw_version_children[n]&gt;<span class="dv">1</span> &amp;&amp; device_children[parent]&gt;<span class="dv">1</span>){</span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>            length_mu_raw_params    = length_mu_raw_params + <span class="dv">1</span>;</span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>            length_sigma_raw_params = length_sigma_raw_params + <span class="dv">1</span>;</span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>    }</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ol type="1">
+<li><p><strong>The software-version level allocates no <code>sd</code>.</strong> <code>sd</code> is <em>between-child</em> variation, and a software version’s children are the individual customers — their spread is already <code>sigma_sw_version</code>. The deepest grouping level only needs <code>mu</code> and <code>sigma</code>.</p></li>
+<li><p><strong>The software-version condition is stricter</strong>: it requires <em>both</em> that the parent device has multiple software versions (<code>device_children[parent] &gt; 1</code>) <em>and</em> that this software version has multiple observations (<code>sw_version_children[n] &gt; 1</code>). A software version with a single observation can’t support its own mean-and-scale pair since one data point can’t be separated from its group mean.</p></li>
+</ol>
+<p>Whatever counting logic lives here must be mirrored <em>exactly</em> by the counter logic in <code>transformed parameters</code>. If the two ever disagree, the model will either index out of bounds or leave parameters unused (both are bugs).</p>
+</section>
+<section id="b.-prior-widths-and-the-discount-floor" class="level3">
+<h3 class="anchored" data-anchor-id="b.-prior-widths-and-the-discount-floor">2b. Prior widths and the discount floor</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span> PRIOR_LOG_SCALE_ROOT;    <span class="co">// width of the lognormal prior on the root scales</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span> PRIOR_SCALE_TAU;         <span class="co">// half-normal scale on level-to-level spread</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; MIN_SIGMA_DISC; <span class="co">// floor on the discount residual sd</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>PRIOR_LOG_SCALE_ROOT = <span class="fl">0.7</span>;</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>PRIOR_SCALE_TAU      = <span class="fl">0.5</span>;</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>MIN_SIGMA_DISC       = <span class="fl">0.02</span> * sd(discount);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The <code>transformed data</code> block is meant for performing any transformations on the data. Example: <code>sd(discount)</code> is a Stan function evaluated once on the observed data.</p>
+<p>We’ll come back to <code>MIN_SIGMA_DISC</code> when we reach the likelihood; it exists to defuse a genuine pathology in the simulated <code>discount</code> column.</p>
+</section>
+</section>
+<section id="non-centered-parameterization-why-raw-parameters" class="level2">
+<h2 class="anchored" data-anchor-id="non-centered-parameterization-why-raw-parameters">3. Non-Centered Parameterization — Why “Raw” Parameters?</h2>
+<p>Before going through the the <code>parameters</code> block, we need to discuss the single most important implementation idea in this model.</p>
+<p>The <em>natural</em> (centered) way to write a hierarchy is to sample each level directly around its parent:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>mu_os[i] ~ normal(mu_root, sd_root);   <span class="co">// centered - looks natural, samples badly</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The problem is the posterior geometry this creates is notoriously hard for MCMC. When <code>sd_root</code> is small, all the <code>mu_os[i]</code> are squeezed into a narrow band around <code>mu_root</code>. When it’s large, they spread out. The joint posterior of <code>(sd_root, mu_os)</code> forms a <strong>funnel</strong> (“Neal’s funnel”) — a shape where no single step size works everywhere. The sampler either takes steps too big for the funnel’s neck (divergent transitions) or too small for its mouth (slow, autocorrelated chains). Funnels are worst exactly where hierarchical models are most useful: <strong>sparse groups</strong>, where the data doesn’t pin the group-level parameters down.</p>
+<p>The fix is the <strong>non-centered parameterization</strong>: sample a <em>standardized</em> raw value, then shift and scale it deterministically:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">vector</span>[...] mu_raw;                 <span class="co">// sampled as standard normal</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    mu_raw ~ normal(<span class="dv">0</span>, <span class="dv">1</span>);              <span class="co">// simple, well-behaved geometry</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    mu_os[i] = mu_root + sd_root * mu_raw[ctr];   <span class="co">// identical distribution!</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Mathematically, <code>mu_root + sd_root * z</code> with <code>z ~ N(0,1)</code> is <em>exactly</em> same as <code>N(mu_root, sd_root)</code>. But now the sampler explores independent standard normals (a nice round blob) instead of a funnel, and the funnel geometry is absorbed into the deterministic transform.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="funnel_bowl_centered_parametrization_part3.png" class="img-fluid figure-img"></p>
+<figcaption>Centered vs non-centered parameterization: the funnel and the bowl</figcaption>
+</figure>
+</div>
+<p><em>Left: in the centered parameterization the sampler has to squeeze into the funnel’s narrow neck as the log-variance shrinks, so no single step size works everywhere. Right: after the non-centered transform it explores a smooth, symmetric bowl with the same curvature in every direction, so one step size fits the whole space.</em></p>
+<p>Model 1.6 applies this trick to <strong>every</strong> stochastic relationship in the tree.</p>
+</section>
+<section id="mu-an-additive-gaussian-parameter" class="level2">
+<h2 class="anchored" data-anchor-id="mu-an-additive-gaussian-parameter">4. <code>mu</code> — an Additive, Gaussian Parameter</h2>
+<p>Let’s start with the question - <strong>what is the natural arithmetic of a group mean?</strong></p>
+<p>Revenue means live on an unbounded, additive scale. What we want to be able to say are differences:</p>
+<blockquote class="blockquote">
+<p><em>“iPhone customers spend about 900 more than the average Android customer.”</em></p>
+</blockquote>
+<p>Not ratios, not something confined to a positive interval. So the natural relationship between a parent and child mean is <em>parent plus an offset</em>, and the natural distribution for an offset that could go either way is a Gaussian centred on zero. Hence:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>mu_os[i]      = mu_root              + sd_root * mu_raw[ctr_mu];</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>mu_device[i]  = mu_os[parent_idx]    + sd_os[parent_idx]    * mu_raw[ctr_mu];</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>mu_sw_version[i] = mu_device[parent_idx] + sd_device[parent_idx] * mu_raw[ctr_mu];</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>with <code>mu_raw ~ normal(0, 1)</code>. Every line has the same shape: <strong>child = parent + (parent’s <code>sd</code>) × (a standard normal draw)</strong>.</p>
+<section id="why-the-parents-sd-is-the-childs-prior-scale" class="level3">
+<h3 class="anchored" data-anchor-id="why-the-parents-sd-is-the-childs-prior-scale">Why the parent’s <code>sd</code> is the child’s prior scale</h3>
+<p>This is the mechanism that makes it “hierarchical” rather than just “nested”. <code>sd_root</code> is a parameter, learned from the data, and it directly controls how far children may wander from their parent:</p>
+<ul>
+<li>If the data says <code>sd_root</code> is <strong>small</strong>, then <code>mu_os[ios]</code> and <code>mu_os[android]</code> are both forced to sit close to <code>mu_root</code>. Strong pooling: the model concludes that OS barely matters.</li>
+<li>If the data says <code>sd_root</code> is <strong>large</strong>, the two OS means are free to separate. Weak pooling: OS matters a lot.</li>
+</ul>
+<p>The model does not have to be told which regime it is in. It infers <code>sd_root</code> from how spread out the OS-level evidence actually is.</p>
+</section>
+<section id="a-worked-shrinkage-example-nokia" class="level3">
+<h3 class="anchored" data-anchor-id="a-worked-shrinkage-example-nokia">A worked shrinkage example: Nokia</h3>
+<p>Nokia has 16 data points in the simulated dataset but let’s assume for the sake of this argument that Nokia had exactly one customer in the data, with revenue 400 and the Android average is 1000.</p>
+<ul>
+<li>A <strong>no-pooling</strong> model (fit each device separately) would estimate <code>mu_device[nokia] = 400</code> — confidently, on the basis of a single point. This would be similar to what we’d face in the traditional ML world.</li>
+<li>A <strong>complete-pooling</strong> model (ignore device) would estimate 1000, throwing away the fact that this customer looks unusual.</li>
+<li>The <strong>hierarchical</strong> model estimates <code>mu_device[nokia] = mu_os[android] + sd_os[android] * z</code>, where <code>z</code> is pulled toward 0 by its <code>N(0,1)</code> prior and away from 0 by that single observation. One data point is weak evidence, so the posterior lands <em>between</em> the two extremes, closer to the Android mean, with an honestly wide interval.</li>
+</ul>
+<p>That “somewhere in between, and the data decides where” is partial pooling, and it falls out of this one line of arithmetic.</p>
+</section>
+<section id="and-the-root-itself" class="level3">
+<h3 class="anchored" data-anchor-id="and-the-root-itself">And the root itself</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>mu_root = LOCATION_mu_root + SCALE_mu_root * mu_raw[<span class="dv">1</span>];</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The root has no parent, so its “parent” is the prior we supply: <code>1300 + 200 * z</code>, i.e.&nbsp;<code>N(1300, 200)</code> written non-centrally. Consistent with every other level — the root just gets its location and scale from the input data dictionary passed to the model instead of from a node above it.</p>
+</section>
+</section>
+<section id="sigma-and-sd-multiplicative-lognormal-parameters" class="level2">
+<h2 class="anchored" data-anchor-id="sigma-and-sd-multiplicative-lognormal-parameters">5. <code>sigma</code> and <code>sd</code> — Multiplicative, Lognormal Parameters</h2>
+<p>Now ask the same question about the scale parameters, and notice that the answer changes.</p>
+<p><strong>Scales are strictly positive, and they compare naturally by ratio, not by difference.</strong></p>
+<blockquote class="blockquote">
+<p><em>“iPhone revenue is about four times as variable as iPad revenue.”</em></p>
+</blockquote>
+<p>Not “500 more variable”. And an additive step has a fatal flaw for a positive quantity: nothing stops <code>parent + offset</code> from going negative, which is meaningless for a standard deviation.</p>
+<p>So the natural relationship is <strong>multiplicative</strong>:</p>
+<p><span class="math display">\sigma_{child} = \sigma_{parent} \times (\text{some positive factor})</span></p>
+<p>And the natural way to parameterize a positive multiplicative factor is to work on the <strong>log scale</strong>, where multiplication becomes addition and the whole non-centered trick from the last section applies unchanged:</p>
+<p><span class="math display">\log \sigma_{child} = \log \sigma_{parent} + \tau_\sigma \cdot z, \qquad z \sim \mathcal{N}(0,1)</span></p>
+<p>Exponentiate both sides and you get:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>sigma_os[i]     = sigma_root            * exp(tau_sigma * sigma_raw[ctr_mu]);</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>sigma_device[i] = sigma_os[parent_idx]  * exp(tau_sigma * sigma_raw[ctr_mu]);</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>sd_os[i]        = sd_root               * exp(tau_sd    * sd_raw[ctr_sd]);</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>sd_device[i]    = sd_os[parent_idx]     * exp(tau_sd    * sd_raw[ctr_sd]);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This is the <em>same</em> hierarchical statement as for <code>mu</code> — child centred on parent, with a learned spread — just expressed in log space because that is where scales are additive. It is a <strong>lognormal</strong> hierarchy.</p>
+<section id="a.-tau-letting-the-data-decide-how-heterogeneous-the-scales-are" class="level3">
+<h3 class="anchored" data-anchor-id="a.-tau-letting-the-data-decide-how-heterogeneous-the-scales-are">5a. <code>tau</code> — letting the data decide how heterogeneous the scales are</h3>
+<p>Notice that <code>tau_sigma</code> and <code>tau_sd</code> are also <strong>parameters, not constants</strong>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; tau_sigma;</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; tau_sd;</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>    tau_sigma ~ normal(<span class="dv">0</span>, PRIOR_SCALE_TAU);   <span class="co">// half-normal: lower=0 in the declaration</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>    tau_sd    ~ normal(<span class="dv">0</span>, PRIOR_SCALE_TAU);</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>tau</code> is the hierarchical prior <em>on the scales themselves</em>. It captures <strong>how much do sibling groups differ in how variable they are.</strong></p>
+<ul>
+<li>If <code>tau_sigma → 0</code>, thenevery group in the tree has the same within-group spread. Complete pooling of scales; the model collapses to a single global <code>sigma</code>.</li>
+<li>If <code>tau_sigma</code> is large, then each group’s variability is essentially free to be its own thing. No pooling of scales.</li>
+<li>If <code>tau_sigma</code> is in between, then partial pooling, exactly as <code>sd_root</code> does for the means.</li>
+</ul>
+<p>Because <code>tau_sigma</code> is declared <code>&lt;lower=0&gt;</code> and given <code>normal(0, 0.5)</code>, Stan reads that as a <strong>half-normal</strong>: a soft prior concentrated near zero (the sceptical default — “probably the groups are similar”) with a long enough tail to allow real heterogeneity if the data dictates.</p>
+</section>
+<section id="b.-the-root-scales" class="level3">
+<h3 class="anchored" data-anchor-id="b.-the-root-scales">5b. The root scales</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>sigma_root = SCALE_sigma_root * exp(PRIOR_LOG_SCALE_ROOT * sigma_raw[<span class="dv">1</span>]);</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>sd_root    = SCALE_sd_root    * exp(PRIOR_LOG_SCALE_ROOT * sd_raw[<span class="dv">1</span>]);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Same construction, but the “parent” is the prior. With <code>PRIOR_LOG_SCALE_ROOT = 0.7</code>, this is a <code>lognormal(log(100), 0.7)</code> prior: median 100, and a 95% interval of roughly <code>[25, 400]</code>. This implies that ehe overall scale of variation is around 100, but it could also be 30 or 350, which is a weak but it’s about as much as we honestly know before seeing the data.</p>
+</section>
+</section>
+<section id="the-parameters-block-what-the-sampler-actually-explores" class="level2">
+<h2 class="anchored" data-anchor-id="the-parameters-block-what-the-sampler-actually-explores">6. The <code>parameters</code> Block — What the Sampler Actually Explores</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Hierarchy raw parameters - ALL unconstrained standard-normal z-scores</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">vector</span>[length_mu_raw_params]    mu_raw;</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">vector</span>[length_sigma_raw_params] sigma_raw;   <span class="co">// z-scores for log(sigma)</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">vector</span>[length_sd_raw_params]    sd_raw;      <span class="co">// z-scores for log(sd)</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// How much a scale may move from one level of the tree to the next</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; tau_sigma;</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; tau_sd;</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Discount regression</span></span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">vector</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt;[num_countries] beta_country;</span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span>&lt;<span class="kw">lower</span>=MIN_SIGMA_DISC&gt; sigma_disc_error;</span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>None of the parameters we actually care about are sampled directly. Everything the sampler touches is a <em>raw</em> ingredient:</p>
+<ul>
+<li><strong><code>mu_raw</code></strong> — one flat vector holding the standardized location offsets for <strong>every</strong> node that earned its own parameter (root + OSes + devices + software versions). Its length is exactly the <code>length_mu_raw_params</code> computed in <code>transformed data</code>.</li>
+<li><strong><code>sigma_raw</code>, <code>sd_raw</code></strong> — also plain <code>N(0,1)</code> z-scores, but living on the <strong>log</strong> scale: <code>sigma_raw[k]</code> is the standardized log-multiplier for node <code>k</code>.</li>
+<li><strong><code>tau_sigma</code>, <code>tau_sd</code></strong> — the two learned heterogeneity parameters from the previous section.</li>
+<li><strong><code>beta_country</code></strong> — the per-country discount fraction. Note it is a <em>direct</em> parameter with <code>lower=0</code>.</li>
+<li><strong><code>sigma_disc_error</code></strong> — a single scalar</li>
+</ul>
+</section>
+<section id="the-transformed-parameters-block-assembling-the-tree" class="level2">
+<h2 class="anchored" data-anchor-id="the-transformed-parameters-block-assembling-the-tree">7. The <code>transformed parameters</code> Block — Assembling the Tree</h2>
+<p>This is where the flat raw vectors become the actual hierarchical parameters, walking the tree from root to leaves. It re-runs at every sampler step.</p>
+<section id="the-counter-scheme" class="level3">
+<h3 class="anchored" data-anchor-id="the-counter-scheme">The counter scheme</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> ctr_mu;  <span class="co">// counter into mu_raw AND sigma_raw</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> ctr_sd;  <span class="co">// counter into sd_raw</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>ctr_mu = <span class="dv">1</span>;</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>ctr_sd = <span class="dv">1</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>All raw values are packed into flat vectors, so we need a way to know which slot belongs to which tree node. Rather than pre-computing index offsets per level, the code <strong>consumes slots in order with incrementing counters</strong>: every time a node claims a parameter it reads <code>mu_raw[ctr_mu]</code> and bumps the counter. As long as this walk visits nodes in the same order — and applies the same skip conditions — as the counting loop in <code>transformed data</code>, every raw slot is consumed exactly once. It’s a compact way to handle trees of any shape without the ragged multidimensional arrays Stan doesn’t support well.</p>
+<p>Two counters are needed because <code>sd</code> parameters stop one level earlier than <code>mu</code>/<code>sigma</code> (software versions have no <code>sd</code>).</p>
+</section>
+<section id="a.-root-level" class="level3">
+<h3 class="anchored" data-anchor-id="a.-root-level">7a. Root level</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co">/// Root level of tree</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>mu_root    = LOCATION_mu_root + SCALE_mu_root * mu_raw[ctr_mu];</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="co">// lognormal, centred on the scale the user supplies, but free to move</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="co">// an order of magnitude in either direction.</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>sigma_root = SCALE_sigma_root * exp(PRIOR_LOG_SCALE_ROOT * sigma_raw[ctr_mu]);</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>sd_root    = SCALE_sd_root    * exp(PRIOR_LOG_SCALE_ROOT * sd_raw[ctr_sd]);</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>ctr_mu = ctr_mu + <span class="dv">1</span>;</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>ctr_sd = ctr_sd + <span class="dv">1</span>;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>mu</code> is additive, the two scales, <code>sigma</code> and <code>sd</code> multiplicative.</p>
+</section>
+<section id="b.-level-1-operating-system" class="level3">
+<h3 class="anchored" data-anchor-id="b.-level-1-operating-system">7b. Level 1 — Operating system</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co">/// First Layer of Hierarchy - operating system</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>( i <span class="cf">in</span> <span class="dv">1</span>:num_os ){</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(num_os&gt;<span class="dv">1</span>){</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>        mu_os[i]    = mu_root + sd_root * mu_raw[ctr_mu];</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>        <span class="co">// multiplicative, but exp(tau*z) can be &lt; 1 as well as &gt; 1</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>        sigma_os[i] = sigma_root * exp(tau_sigma * sigma_raw[ctr_mu]);</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>        sd_os[i]    = sd_root    * exp(tau_sd    * sd_raw[ctr_sd]);</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>        ctr_mu = ctr_mu + <span class="dv">1</span>;</span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>        ctr_sd = ctr_sd + <span class="dv">1</span>;</span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>    }<span class="cf">else</span>{</span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>        mu_os[i]    = mu_root;</span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>        sigma_os[i] = sigma_root;</span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>        sd_os[i]    = sd_root;</span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>The parent’s <code>sd</code> is the child’s prior scale</strong> for the mean; <strong>the parent’s <code>sigma</code> is the child’s baseline</strong> for the spread. Both are learned. And here is the first <strong>collapse</strong>: with a single OS there is no between-OS variation to estimate, so the OS level simply <em>becomes</em> the root, matching the <code>if (num_os &gt; 1)</code> condition in <code>transformed data</code>.</p>
+</section>
+<section id="c.-level-2-device" class="level3">
+<h3 class="anchored" data-anchor-id="c.-level-2-device">7c. Level 2 — Device</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co">/// Second Layer of Hierarchy - devices</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>( i <span class="cf">in</span> <span class="dv">1</span>:num_devices){</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    parent_idx = device_parent[i]; <span class="co">// the parent of device in the hierarchy is the operating system</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(os_children[parent_idx]&gt;<span class="dv">1</span>){</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>        mu_device[i]    = mu_os[parent_idx] + sd_os[parent_idx] * mu_raw[ctr_mu];</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>        sigma_device[i] = sigma_os[parent_idx] * exp(tau_sigma * sigma_raw[ctr_mu]);</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>        sd_device[i]    = sd_os[parent_idx]    * exp(tau_sd    * sd_raw[ctr_sd]);</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>        ctr_mu = ctr_mu + <span class="dv">1</span>;</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>        ctr_sd = ctr_sd + <span class="dv">1</span>;</span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>    }<span class="cf">else</span>{</span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>        mu_device[i]    = mu_os[parent_idx];</span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>        sigma_device[i] = sigma_os[parent_idx];</span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>        sd_device[i]    = sd_os[parent_idx];</span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Same pattern, one level down, with the parent looked up through <code>device_parent[i]</code>. Samsung’s mean is drawn around <em>Android’s</em> mean (not the root’s), scaled by <em>Android’s</em> <code>sd</code>. This is how information flows through the tree: Nokia has only a few observations so it barely moves <code>mu_device[nokia]</code> away from <code>mu_os[android]</code>, which is itself well-estimated from Samsung’s and Huawei’s abundant data.</p>
+</section>
+<section id="d.-level-3-software-version" class="level3">
+<h3 class="anchored" data-anchor-id="d.-level-3-software-version">7d. Level 3 — Software version</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co">/// Third Layer of Hierarchy - software versions</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>( i <span class="cf">in</span> <span class="dv">1</span>:num_software_versions){</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    parent_idx = sw_version_parent[i]; <span class="co">// the parent of software versions in the hierarchy is devices</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(device_children[parent_idx]&gt;<span class="dv">1</span> &amp;&amp; sw_version_children[i]&gt;<span class="dv">1</span> ){</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>        mu_sw_version[i]    = mu_device[parent_idx] + sd_device[parent_idx] * mu_raw[ctr_mu];</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>        sigma_sw_version[i] = sigma_device[parent_idx] * exp(tau_sigma * sigma_raw[ctr_mu]);</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>        ctr_mu = ctr_mu + <span class="dv">1</span>;</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>    }<span class="cf">else</span>{</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>        mu_sw_version[i]    = mu_device[parent_idx];</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>        sigma_sw_version[i] = sigma_device[parent_idx];</span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Two deliberate differences from the levels above:</p>
+<ol type="1">
+<li><strong>No <code>sd_sw_version</code>.</strong> This is the deepest <em>grouping</em> level — its children are individual customers, whose spread is <code>sigma_sw_version</code>. A between-child <code>sd</code> here would be redundant.</li>
+<li><strong>A stricter, two-part collapse condition.</strong> A software version gets its own parameters only if its parent device has multiple versions <em>and</em> the version itself has multiple observations.</li>
+</ol>
+</section>
+<section id="e.-down-to-the-observation" class="level3">
+<h3 class="anchored" data-anchor-id="e.-down-to-the-observation">7e. Down to the observation</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>revenue_hierarchy = mu_sw_version[software_version];</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>sigma_revenue     = sigma_sw_version[software_version];</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Two vectorized lookups, expanding version-level vectors to one entry per row. Every customer inherits their software version’s mean and spread — and that is the entire observation model for revenue.</p>
+</section>
+</section>
+<section id="the-model-block-priors" class="level2">
+<h2 class="anchored" data-anchor-id="the-model-block-priors">8. The <code>model</code> Block — Priors</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// PRIORS</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>    mu_raw    ~ normal(<span class="dv">0</span>,<span class="dv">1</span>);</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>    sigma_raw ~ normal(<span class="dv">0</span>,<span class="dv">1</span>);   <span class="co">// =&gt; lognormal priors on sigma_root/os/device/sw</span></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>    sd_raw    ~ normal(<span class="dv">0</span>,<span class="dv">1</span>);   <span class="co">// =&gt; lognormal priors on sd_root/os/device</span></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>    tau_sigma ~ normal(<span class="dv">0</span>, PRIOR_SCALE_TAU); <span class="co">// half-normal (lower=0 in decl.)</span></span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>    tau_sd    ~ normal(<span class="dv">0</span>, PRIOR_SCALE_TAU);</span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>    beta_country ~ lognormal(log(<span class="fl">0.25</span> * SCALE_beta_country), <span class="fl">0.5</span>);</span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a>    sigma_disc_error ~ normal(MIN_SIGMA_DISC, <span class="fl">0.5</span> * sd(discount));</span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a>    ...</span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Three <code>normal(0, 1)</code> statements now carry the entire hierarchy. This is the payoff of the non-centered parameterization: <strong>the structure lives in the transforms, so the priors stay trivial.</strong> <code>mu_raw ~ normal(0,1)</code> is one vectorized line, yet through the previous block it <em>implies</em> the whole cascade — <code>mu_os ~ N(mu_root, sd_root)</code>, <code>mu_device ~ N(mu_os, sd_os)</code>, and so on. Likewise <code>sigma_raw ~ normal(0,1)</code> implies <code>sigma_os ~ lognormal(log(sigma_root), tau_sigma)</code> at every level.</p>
+<p><code>beta_country</code>has a lognormal prior with <code>lower=0</code> : median 0.25, 95% interval roughly <code>[0.094, 0.66]</code>. Soft everywhere, zero density only at zero itself, and no wall near any plausible value.</p>
+</section>
+<section id="the-model-block-likelihood" class="level2">
+<h2 class="anchored" data-anchor-id="the-model-block-likelihood">9. The <code>model</code> Block — Likelihood</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co">// LIKELIHOOD</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="kw">target +=</span> normal_lpdf(revenue  | revenue_hierarchy, sigma_revenue);</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="kw">target +=</span> normal_lpdf(discount | beta_country[country] .* revenue, sigma_disc_error);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>(<code>target += normal_lpdf(...)</code> is equivalent to the <code>~</code> notation — it adds the log-density directly to the accumulated log-posterior.)</p>
+<ol type="1">
+<li><strong>Revenue</strong>: <code>revenue[i] ~ N(mu_sw_version[v(i)], sigma_sw_version[v(i)])</code> — a customer’s revenue is drawn around their software version’s mean.</li>
+<li><strong>Discount</strong>: <code>discount[i] ~ N(beta_country[c(i)] * revenue[i], sigma_disc_error)</code> — a customer’s discount is a country-specific fraction of their revenue.</li>
+</ol>
+<p>Since the data generated didn’t have any noise term for <code>discount</code>, we include the noise term below.</p>
+<div id="67d3924a" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co">### Add the observation noise the discount column as was done in part2</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>DISCOUNT_NOISE_SD <span class="op">=</span> <span class="fl">25.0</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> DISCOUNT_NOISE_SD <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>    rng   <span class="op">=</span> np.random.default_rng(<span class="dv">12345678</span>)</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>    noisy <span class="op">=</span> sim_df[<span class="st">'discount'</span>] <span class="op">+</span> rng.normal(<span class="dv">0</span>, DISCOUNT_NOISE_SD, sim_df.shape[<span class="dv">0</span>])</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">### Discount can't be negative so Stan declares `vector&lt;lower=0&gt;[num_samples] discount`</span></span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>    n_clipped <span class="op">=</span> <span class="bu">int</span>((noisy <span class="op">&lt;</span> <span class="dv">0</span>).<span class="bu">sum</span>())</span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> n_clipped:</span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"WARNING: clipped </span><span class="sc">{</span>n_clipped<span class="sc">}</span><span class="ss"> negative discount value(s) at 0"</span>)</span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a>    sim_df[<span class="st">'discount'</span>] <span class="op">=</span> noisy.clip(lower<span class="op">=</span><span class="fl">0.0</span>)</span>
+<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-14"><a href="#cb33-14" aria-hidden="true" tabindex="-1"></a><span class="co">### Before: discount/revenue was EXACTLY the country weight for every row.</span></span>
+<span id="cb33-15"><a href="#cb33-15" aria-hidden="true" tabindex="-1"></a><span class="co">### After:  it scatters around it, which is what the model assumes.</span></span>
+<span id="cb33-16"><a href="#cb33-16" aria-hidden="true" tabindex="-1"></a>ratio <span class="op">=</span> (sim_df[<span class="st">'discount'</span>] <span class="op">/</span> sim_df[<span class="st">'revenue'</span>]).groupby(sim_df[<span class="st">'country'</span>]).agg([<span class="st">'mean'</span>, <span class="st">'std'</span>])</span>
+<span id="cb33-17"><a href="#cb33-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"discount / revenue ratio by country:"</span>)</span>
+<span id="cb33-18"><a href="#cb33-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(ratio.<span class="bu">round</span>(<span class="dv">4</span>).to_string())</span>
+<span id="cb33-19"><a href="#cb33-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">sd(discount) = </span><span class="sc">{</span>sim_df[<span class="st">'discount'</span>]<span class="sc">.</span>std()<span class="sc">:.1f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>WARNING: clipped 1 negative discount value(s) at 0
+discount / revenue ratio by country:
+           mean     std
+country                
+China    0.2305  0.0293
+India    0.3496  0.0327
+Russia   0.1077  0.0284
+UK       0.1473  0.0307
+US       0.2032  0.0286
+
+sd(discount) = 172.0</code></pre>
+</div>
+</div>
+</section>
+<section id="the-generated-quantities-block-setting-up-for-validation" class="level2">
+<h2 class="anchored" data-anchor-id="the-generated-quantities-block-setting-up-for-validation">10. The <code>generated quantities</code> Block — Setting Up for Validation</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span>{</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">vector</span>[num_samples] log_lik;      <span class="co">// for loo / waic in the evaluation notebook</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">vector</span>[num_samples] revenue_rep;  <span class="co">// posterior predictive draws</span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span>(n <span class="cf">in</span> <span class="dv">1</span>:num_samples){</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>        log_lik[n] = normal_lpdf(revenue[n]  | revenue_hierarchy[n], sigma_revenue[n])</span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>                   + normal_lpdf(discount[n] | beta_country[country[n]] * revenue[n], sigma_disc_error);</span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>        revenue_rep[n] = normal_rng(revenue_hierarchy[n], sigma_revenue[n]);</span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This block runs once per <em>retained draw</em>, after the expensive work is done, and it is where you put anything you’ll want for model validation:</p>
+<ul>
+<li><strong><code>log_lik</code></strong> — the pointwise log-likelihood of each observation. This is what <code>arviz.loo()</code> needs to compute leave-one-out cross-validation. Without it exported at sampling time, you cannot compute LOO afterwards; you have to refit.</li>
+<li><strong><code>revenue_rep</code></strong> — a fresh simulated revenue for each customer, drawn from the fitted model. Comparing the distribution of <code>revenue_rep</code> against the real <code>revenue</code> is a <strong>posterior predictive check</strong>: if the model cannot generate data that looks like what you observed, it does not matter how clean the diagnostics are.</li>
+</ul>
+</section>
+<section id="training-the-model" class="level2">
+<h2 class="anchored" data-anchor-id="training-the-model">11. Training the Model</h2>
+<p>Now let’s actually run it. The workflow:</p>
+<ol type="1">
+<li>Derive the hierarchy arrays from the dataframe.</li>
+<li>Assemble the <strong>data dictionary</strong> whose keys match the Stan <code>data</code> block exactly.</li>
+<li>Sanity-check the inputs.</li>
+<li>Compile the Stan model and run MCMC sampling.</li>
+<li><strong>Check the diagnostics before looking at a single parameter.</strong></li>
+<li>Pickle the fitted object for evaluation (Part 4).</li>
+</ol>
+<div id="23d7829b" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pystan</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> arviz <span class="im">as</span> az</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"pystan"</span>, pystan.__version__)</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a><span class="co"># print("CC set to:", os.environ.get("CC"))</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>INFO:numexpr.utils:Note: NumExpr detected 10 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 8.
+INFO:numexpr.utils:NumExpr defaulting to 8 threads.</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>pystan 2.19.1.1</code></pre>
+</div>
+</div>
+<section id="deriving-the-hierarchy-arrays" class="level3">
+<h3 class="anchored" data-anchor-id="deriving-the-hierarchy-arrays">Deriving the hierarchy arrays</h3>
+<p>The Stan model needs the children counts and parent maps we discussed in the <code>data</code> block. Two helpers in <code>helper_utilities.py</code> derive them straight from the dataframe:</p>
+<ul>
+<li><code>get_num_children(df, parent_col, child_col)</code> — for each parent (ordered by its Stan index), the number of <em>distinct</em> children under it.</li>
+<li><code>get_parent(df, parent_col, child_col)</code> — for each child (ordered by its Stan index), its parent’s index.</li>
+</ul>
+<p>Note the dataframe already carries <code>*_index</code> columns (<code>os_index</code>, <code>device_type_index</code>, …) — the 1-based integer codes Stan requires. Let’s inspect what these helpers produce, and check them against the collapse rules from section 2:</p>
+<div id="bb7460d1" class="cell" data-execution_count="8">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co">### Children counts: how many devices per OS, how many software versions per device, ...</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"os_children (devices per OS):"</span>)</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(helper.get_num_children(sim_df, parent_col<span class="op">=</span><span class="st">'os'</span>, child_col<span class="op">=</span><span class="st">'device_type'</span>), <span class="st">"</span><span class="ch">\n</span><span class="st">"</span>)</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"device_children (software versions per device):"</span>)</span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(helper.get_num_children(sim_df, parent_col<span class="op">=</span><span class="st">'device_type'</span>, child_col<span class="op">=</span><span class="st">'software_version'</span>), <span class="st">"</span><span class="ch">\n</span><span class="st">"</span>)</span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"sw_version_children (customers per software version):"</span>)</span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(helper.get_num_children(sim_df, parent_col<span class="op">=</span><span class="st">'software_version'</span>, child_col<span class="op">=</span><span class="st">'id'</span>), <span class="st">"</span><span class="ch">\n</span><span class="st">"</span>)</span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a><span class="co">### Parent maps: which OS each device belongs to, which device each software version belongs to</span></span>
+<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"device_parent (OS index for each device):"</span>)</span>
+<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(helper.get_parent(sim_df, parent_col<span class="op">=</span><span class="st">'os'</span>, child_col<span class="op">=</span><span class="st">'device_type'</span>), <span class="st">"</span><span class="ch">\n</span><span class="st">"</span>)</span>
+<span id="cb39-14"><a href="#cb39-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-15"><a href="#cb39-15" aria-hidden="true" tabindex="-1"></a><span class="co">### Which nodes will COLLAPSE onto their parent? (section 2's rules)</span></span>
+<span id="cb39-16"><a href="#cb39-16" aria-hidden="true" tabindex="-1"></a>dev_children <span class="op">=</span> helper.get_num_children(sim_df, parent_col<span class="op">=</span><span class="st">'device_type'</span>, child_col<span class="op">=</span><span class="st">'software_version'</span>)</span>
+<span id="cb39-17"><a href="#cb39-17" aria-hidden="true" tabindex="-1"></a>sw_children  <span class="op">=</span> helper.get_num_children(sim_df, parent_col<span class="op">=</span><span class="st">'software_version'</span>, child_col<span class="op">=</span><span class="st">'id'</span>)</span>
+<span id="cb39-18"><a href="#cb39-18" aria-hidden="true" tabindex="-1"></a>sw_parent    <span class="op">=</span> helper.get_parent(sim_df, parent_col<span class="op">=</span><span class="st">'device_type'</span>, child_col<span class="op">=</span><span class="st">'software_version'</span>)</span>
+<span id="cb39-19"><a href="#cb39-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-20"><a href="#cb39-20" aria-hidden="true" tabindex="-1"></a>n_customers <span class="op">=</span> <span class="bu">dict</span>(<span class="bu">zip</span>(sw_children[<span class="st">'software_version'</span>], sw_children[<span class="st">'num_children'</span>]))</span>
+<span id="cb39-21"><a href="#cb39-21" aria-hidden="true" tabindex="-1"></a>n_versions  <span class="op">=</span> <span class="bu">dict</span>(<span class="bu">zip</span>(dev_children[<span class="st">'device_type_index'</span>], dev_children[<span class="st">'num_children'</span>]))</span>
+<span id="cb39-22"><a href="#cb39-22" aria-hidden="true" tabindex="-1"></a>device_name <span class="op">=</span> <span class="bu">dict</span>(<span class="bu">zip</span>(dev_children[<span class="st">'device_type_index'</span>], dev_children[<span class="st">'device_type'</span>]))</span>
+<span id="cb39-23"><a href="#cb39-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-24"><a href="#cb39-24" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Software versions that inherit their device's parameters instead of getting their own:"</span>)</span>
+<span id="cb39-25"><a href="#cb39-25" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _, row <span class="kw">in</span> sw_parent.iterrows():</span>
+<span id="cb39-26"><a href="#cb39-26" aria-hidden="true" tabindex="-1"></a>    sw       <span class="op">=</span> row[<span class="st">'software_version'</span>]</span>
+<span id="cb39-27"><a href="#cb39-27" aria-hidden="true" tabindex="-1"></a>    dev_idx  <span class="op">=</span> row[<span class="st">'parent_id'</span>]</span>
+<span id="cb39-28"><a href="#cb39-28" aria-hidden="true" tabindex="-1"></a>    kids     <span class="op">=</span> <span class="bu">int</span>(n_customers[sw])        <span class="co"># customers on this version</span></span>
+<span id="cb39-29"><a href="#cb39-29" aria-hidden="true" tabindex="-1"></a>    siblings <span class="op">=</span> <span class="bu">int</span>(n_versions[dev_idx])    <span class="co"># versions on the parent device</span></span>
+<span id="cb39-30"><a href="#cb39-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> (kids <span class="op">&gt;</span> <span class="dv">1</span> <span class="kw">and</span> siblings <span class="op">&gt;</span> <span class="dv">1</span>):</span>
+<span id="cb39-31"><a href="#cb39-31" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"  </span><span class="sc">{</span>sw<span class="sc">:8s}</span><span class="ss"> (device </span><span class="sc">{</span>device_name[dev_idx]<span class="sc">:8s}</span><span class="ss">) "</span></span>
+<span id="cb39-32"><a href="#cb39-32" aria-hidden="true" tabindex="-1"></a>              <span class="ss">f"customers=</span><span class="sc">{</span>kids<span class="sc">}</span><span class="ss">, sibling versions=</span><span class="sc">{</span>siblings<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>os_children (devices per OS):
+        os  os_index  num_children
+1      ios         1             2
+0  android         2             3 
+
+device_children (software versions per device):
+  device_type  device_type_index  num_children
+2      iphone                  1             3
+1        ipad                  2             2
+4     samsung                  3             4
+0      huawei                  4             2
+3       nokia                  5             1 
+
+sw_version_children (customers per software version):
+   software_version  software_version_index  num_children
+2            i1.0.1                       1            32
+3            i1.0.2                       2            78
+4            i1.0.3                       3           123
+5           i10.0.1                       4            70
+6           i10.0.2                       5            87
+8              s1.1                       6            21
+9              s1.2                       7            53
+10             s1.3                       8           153
+11             s1.4                       9           210
+0            h2.2.1                      10            77
+1              h2.3                      11            80
+7              n1.1                      12            16 
+
+device_parent (OS index for each device):
+  device_type  device_type_index  parent_id     parent
+2      iphone                  1          1      [ios]
+1        ipad                  2          1      [ios]
+4     samsung                  3          2  [android]
+0      huawei                  4          2  [android]
+3       nokia                  5          2  [android] 
+
+Software versions that inherit their device's parameters instead of getting their own:
+  n1.1     (device nokia   ) customers=16, sibling versions=1</code></pre>
+</div>
+</div>
+</section>
+<section id="stan-model-input---the-data-dictionary" class="level3">
+<h3 class="anchored" data-anchor-id="stan-model-input---the-data-dictionary">Stan Model Input - the data dictionary</h3>
+<p>Every key below corresponds one-to-one to a declaration in the Stan <code>data</code> block — PyStan will raise an error if any are missing or violate the declared constraints.</p>
+<p>The last five entries are the prior hyperparameters. Read them as: mean revenue is believed to be around 1300 ± 200, with between-group and within-group variation scales <em>of the order of</em> 100 (those two are lognormal medians).</p>
+<div id="e3aaad22" class="cell" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>model_dt <span class="op">=</span> {</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">### Dimensions / sizes</span></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'num_samples'</span>:           sim_df.shape[<span class="dv">0</span>],</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">'num_customers'</span>:         sim_df.shape[<span class="dv">0</span>],  <span class="co"># same as num_samples</span></span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">'num_os'</span>:                sim_df.os.nunique(),</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">'num_devices'</span>:           sim_df.device_type.nunique(),</span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">'num_software_versions'</span>: sim_df.software_version.nunique(),</span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">'num_countries'</span>:         sim_df.country_index.nunique(),</span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">### Group membership of each observation (1-based indices)</span></span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">'os'</span>:               sim_df.os_index,</span>
+<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">'device_type'</span>:      sim_df.device_type_index,</span>
+<span id="cb41-13"><a href="#cb41-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">'software_version'</span>: sim_df.software_version_index,</span>
+<span id="cb41-14"><a href="#cb41-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">'country'</span>:          sim_df.country_index,</span>
+<span id="cb41-15"><a href="#cb41-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-16"><a href="#cb41-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">### Hierarchy: children counts</span></span>
+<span id="cb41-17"><a href="#cb41-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">'os_children'</span>:         helper.get_num_children(sim_df, parent_col<span class="op">=</span><span class="st">'os'</span>, child_col<span class="op">=</span><span class="st">'device_type'</span>)[<span class="st">'num_children'</span>],</span>
+<span id="cb41-18"><a href="#cb41-18" aria-hidden="true" tabindex="-1"></a>    <span class="st">'device_children'</span>:     helper.get_num_children(sim_df, parent_col<span class="op">=</span><span class="st">'device_type'</span>, child_col<span class="op">=</span><span class="st">'software_version'</span>)[<span class="st">'num_children'</span>],</span>
+<span id="cb41-19"><a href="#cb41-19" aria-hidden="true" tabindex="-1"></a>    <span class="st">'sw_version_children'</span>: helper.get_num_children(sim_df, parent_col<span class="op">=</span><span class="st">'software_version'</span>, child_col<span class="op">=</span><span class="st">'id'</span>)[<span class="st">'num_children'</span>],</span>
+<span id="cb41-20"><a href="#cb41-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-21"><a href="#cb41-21" aria-hidden="true" tabindex="-1"></a>    <span class="co">### Hierarchy: parent maps</span></span>
+<span id="cb41-22"><a href="#cb41-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">'device_parent'</span>:     helper.get_parent(sim_df, parent_col<span class="op">=</span><span class="st">'os'</span>, child_col<span class="op">=</span><span class="st">'device_type'</span>)[<span class="st">'parent_id'</span>],</span>
+<span id="cb41-23"><a href="#cb41-23" aria-hidden="true" tabindex="-1"></a>    <span class="st">'sw_version_parent'</span>: helper.get_parent(sim_df, parent_col<span class="op">=</span><span class="st">'device_type'</span>, child_col<span class="op">=</span><span class="st">'software_version'</span>)[<span class="st">'parent_id'</span>],</span>
+<span id="cb41-24"><a href="#cb41-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-25"><a href="#cb41-25" aria-hidden="true" tabindex="-1"></a>    <span class="co">### Targets</span></span>
+<span id="cb41-26"><a href="#cb41-26" aria-hidden="true" tabindex="-1"></a>    <span class="st">'revenue'</span>:  sim_df.revenue,</span>
+<span id="cb41-27"><a href="#cb41-27" aria-hidden="true" tabindex="-1"></a>    <span class="st">'discount'</span>: sim_df.discount,</span>
+<span id="cb41-28"><a href="#cb41-28" aria-hidden="true" tabindex="-1"></a>    <span class="st">'install'</span>:  sim_df.install.astype(<span class="bu">int</span>),</span>
+<span id="cb41-29"><a href="#cb41-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-30"><a href="#cb41-30" aria-hidden="true" tabindex="-1"></a>    <span class="co">### Prior hyperparameters</span></span>
+<span id="cb41-31"><a href="#cb41-31" aria-hidden="true" tabindex="-1"></a>    <span class="st">'LOCATION_mu_root'</span>:   <span class="dv">1300</span>,   <span class="co"># prior mean of overall revenue</span></span>
+<span id="cb41-32"><a href="#cb41-32" aria-hidden="true" tabindex="-1"></a>    <span class="st">'SCALE_mu_root'</span>:      <span class="dv">200</span>,    <span class="co"># prior sd of overall revenue</span></span>
+<span id="cb41-33"><a href="#cb41-33" aria-hidden="true" tabindex="-1"></a>    <span class="st">'SCALE_sd_root'</span>:      <span class="dv">100</span>,    <span class="co"># prior MEDIAN between-group spread (lognormal)</span></span>
+<span id="cb41-34"><a href="#cb41-34" aria-hidden="true" tabindex="-1"></a>    <span class="st">'SCALE_sigma_root'</span>:   <span class="dv">100</span>,    <span class="co"># prior MEDIAN within-group spread (lognormal)</span></span>
+<span id="cb41-35"><a href="#cb41-35" aria-hidden="true" tabindex="-1"></a>    <span class="st">'SCALE_beta_country'</span>: <span class="dv">1</span></span>
+<span id="cb41-36"><a href="#cb41-36" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="sanity-checks" class="level3">
+<h3 class="anchored" data-anchor-id="sanity-checks">Sanity checks</h3>
+<p>Stan’s error messages for bad data can be cryptic (“initialization failed” often just means a null or an out-of-range index) and it doesn’t hurt to verify none of the arrays we’re passing contain nulls.</p>
+<div id="22366967" class="cell" data-execution_count="10">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>check_nulls_for_keys <span class="op">=</span> [key <span class="cf">for</span> key <span class="kw">in</span> model_dt.keys()</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>                        <span class="cf">if</span> <span class="kw">not</span> key.startswith((<span class="st">'num'</span>, <span class="st">'LOCATION'</span>, <span class="st">'SCALE'</span>))]</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> key <span class="kw">in</span> check_nulls_for_keys:</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>    n_null <span class="op">=</span> <span class="bu">int</span>(model_dt[key].isnull().<span class="bu">sum</span>())</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Number of nulls for </span><span class="sc">{</span>key<span class="sc">}</span><span class="ss"> in the data passed to stan model = </span><span class="sc">{</span>n_null<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> n_null <span class="op">==</span> <span class="dv">0</span>, <span class="ss">f"</span><span class="sc">{</span>key<span class="sc">}</span><span class="ss"> contains nulls"</span></span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">All inputs clean."</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Number of nulls for os in the data passed to stan model = 0
+Number of nulls for device_type in the data passed to stan model = 0
+Number of nulls for software_version in the data passed to stan model = 0
+Number of nulls for country in the data passed to stan model = 0
+Number of nulls for os_children in the data passed to stan model = 0
+Number of nulls for device_children in the data passed to stan model = 0
+Number of nulls for sw_version_children in the data passed to stan model = 0
+Number of nulls for device_parent in the data passed to stan model = 0
+Number of nulls for sw_version_parent in the data passed to stan model = 0
+Number of nulls for revenue in the data passed to stan model = 0
+Number of nulls for discount in the data passed to stan model = 0
+Number of nulls for install in the data passed to stan model = 0
+
+All inputs clean.</code></pre>
+</div>
+</div>
+</section>
+<section id="compile-and-sample" class="level3">
+<h3 class="anchored" data-anchor-id="compile-and-sample">Compile and sample</h3>
+<p>Two steps happen here:</p>
+<ol type="1">
+<li><strong>Compilation</strong> — <code>pystan.StanModel(...)</code> translates the Stan program to C++ and compiles it. It only needs to happen when the <em>model code</em> changes.</li>
+<li><strong>Sampling</strong> — <code>model.sampling(...)</code> runs the NUTS/HMC sampler:</li>
+</ol>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Argument</th>
+<th>Value</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>chains=2</code></td>
+<td>2 independent chains</td>
+<td>Lets us check convergence (R-hat compares between-chain vs within-chain variance)</td>
+</tr>
+<tr class="even">
+<td><code>warmup=1000</code></td>
+<td>first 1000 draws discarded</td>
+<td>The sampler needs time to adapt its step size and find the typical set</td>
+</tr>
+<tr class="odd">
+<td><code>adapt_delta=0.99</code></td>
+<td>target acceptance rate (default 0.8)</td>
+<td>Higher → smaller steps → fewer divergent transitions, at some speed cost</td>
+</tr>
+<tr class="even">
+<td><code>max_treedepth=12</code></td>
+<td>max NUTS trajectory depth</td>
+<td>Raised from 10 to match the smaller step size</td>
+</tr>
+<tr class="odd">
+<td><code>pars=[...]</code></td>
+<td>parameters to retain</td>
+<td>Keep the interpretable transformed parameters plus <code>log_lik</code>/<code>revenue_rep</code>; drop the raw z-scores</td>
+</tr>
+<tr class="even">
+<td><code>seed=1234</code></td>
+<td>RNG seed</td>
+<td>Reproducibility</td>
+</tr>
+</tbody>
+</table>
+<div id="62d0c3ce" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> pystan.StanModel(<span class="bu">file</span><span class="op">=</span><span class="st">'stan_models/model1.6.stan'</span>)</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>controls <span class="op">=</span> {}</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>controls[<span class="st">'max_treedepth'</span>] <span class="op">=</span> <span class="dv">12</span></span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>controls[<span class="st">'adapt_delta'</span>]   <span class="op">=</span> <span class="fl">0.99</span></span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a><span class="co">### mu_raw / sigma_raw / sd_raw are plain N(0,1) z-scores now, not interpretable</span></span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a><span class="co">### quantities, so they are dropped. log_lik and revenue_rep are required for validation.</span></span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a>params_of_interest <span class="op">=</span> [<span class="st">'mu_root'</span>, <span class="st">'mu_os'</span>, <span class="st">'mu_device'</span>, <span class="st">'mu_sw_version'</span>,</span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>                      <span class="st">'sigma_root'</span>, <span class="st">'sigma_os'</span>, <span class="st">'sigma_device'</span>, <span class="st">'sigma_sw_version'</span>,</span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a>                      <span class="st">'sd_root'</span>, <span class="st">'sd_os'</span>, <span class="st">'sd_device'</span>,</span>
+<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a>                      <span class="st">'beta_country'</span>, <span class="st">'revenue_hierarchy'</span>,</span>
+<span id="cb44-13"><a href="#cb44-13" aria-hidden="true" tabindex="-1"></a>                      <span class="st">'tau_sigma'</span>, <span class="st">'tau_sd'</span>, <span class="st">'sigma_disc_error'</span>,</span>
+<span id="cb44-14"><a href="#cb44-14" aria-hidden="true" tabindex="-1"></a>                      <span class="st">'log_lik'</span>, <span class="st">'revenue_rep'</span>]</span>
+<span id="cb44-15"><a href="#cb44-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-16"><a href="#cb44-16" aria-hidden="true" tabindex="-1"></a>fit <span class="op">=</span> model.sampling(data<span class="op">=</span>model_dt, chains<span class="op">=</span><span class="dv">2</span>, seed<span class="op">=</span><span class="dv">1234</span>, warmup<span class="op">=</span><span class="dv">1000</span>, <span class="bu">iter</span><span class="op">=</span><span class="dv">2000</span>,</span>
+<span id="cb44-17"><a href="#cb44-17" aria-hidden="true" tabindex="-1"></a>                     control<span class="op">=</span>controls, pars<span class="op">=</span>params_of_interest)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Gradient evaluation took 0.000111 seconds
+1000 transitions using 10 leapfrog steps per transition would take 1.11 seconds.
+Adjust your expectations accordingly!
+
+
+
+Gradient evaluation took 6.5e-05 seconds
+1000 transitions using 10 leapfrog steps per transition would take 0.65 seconds.
+Adjust your expectations accordingly!
+
+
+Iteration:    1 / 2000 [  0%]  (Warmup)
+Iteration:    1 / 2000 [  0%]  (Warmup)
+Iteration:  200 / 2000 [ 10%]  (Warmup)
+Iteration:  200 / 2000 [ 10%]  (Warmup)
+Iteration:  400 / 2000 [ 20%]  (Warmup)
+Iteration:  400 / 2000 [ 20%]  (Warmup)
+Iteration:  600 / 2000 [ 30%]  (Warmup)
+Iteration:  600 / 2000 [ 30%]  (Warmup)
+Iteration:  800 / 2000 [ 40%]  (Warmup)
+Iteration:  800 / 2000 [ 40%]  (Warmup)
+Iteration: 1000 / 2000 [ 50%]  (Warmup)
+Iteration: 1001 / 2000 [ 50%]  (Sampling)
+Iteration: 1000 / 2000 [ 50%]  (Warmup)
+Iteration: 1001 / 2000 [ 50%]  (Sampling)
+Iteration: 1200 / 2000 [ 60%]  (Sampling)
+Iteration: 1200 / 2000 [ 60%]  (Sampling)
+Iteration: 1400 / 2000 [ 70%]  (Sampling)
+Iteration: 1400 / 2000 [ 70%]  (Sampling)
+Iteration: 1600 / 2000 [ 80%]  (Sampling)
+Iteration: 1600 / 2000 [ 80%]  (Sampling)
+Iteration: 1800 / 2000 [ 90%]  (Sampling)
+Iteration: 1800 / 2000 [ 90%]  (Sampling)
+Iteration: 2000 / 2000 [100%]  (Sampling)
+
+ Elapsed Time: 48.1312 seconds (Warm-up)
+               64.2051 seconds (Sampling)
+               112.336 seconds (Total)
+</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>WARNING:pystan:Maximum (flat) parameter count (1000) exceeded: skipping diagnostic tests for n_eff and Rhat.
+To run all diagnostics call pystan.check_hmc_diagnostics(fit)
+WARNING:pystan:3 of 2000 iterations ended with a divergence (0.15 %).
+WARNING:pystan:Try running with adapt_delta larger than 0.99 to remove the divergences.</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Iteration: 2000 / 2000 [100%]  (Sampling)
+
+ Elapsed Time: 54.2366 seconds (Warm-up)
+               61.7891 seconds (Sampling)
+               116.026 seconds (Total)
+</code></pre>
+</div>
+</div>
+</section>
+<section id="run-a-basic-diagnostics-check" class="level3">
+<h3 class="anchored" data-anchor-id="run-a-basic-diagnostics-check">Run a Basic Diagnostics Check</h3>
+<p>Before reading a single parameter estimate, check whether the sampler actually worked. A beautiful posterior mean computed from a broken fit is still wrong, and nothing downstream will warn you.</p>
+<p>The one that matters most here is <strong>divergent transitions</strong>. A divergence means the leapfrog integrator lost the Hamiltonian and the affected draws are rejected <em>systematically</em>, not at random.</p>
+<p>Ideally we’d want 0 divergences, but a 0.15% divergence rate is low and means the model had to navigate some touch geometries. It can be fixed by increasing adapt_delta, or max_treedepth or checking the priors or with some re-parametrization.</p>
+<div id="0f2aa94c" class="cell" data-execution_count="25">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>sampler_params <span class="op">=</span> fit.get_sampler_params(inc_warmup<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>n_divergent <span class="op">=</span> <span class="bu">sum</span>(<span class="bu">int</span>(np.<span class="bu">sum</span>(c[<span class="st">'divergent__'</span>])) <span class="cf">for</span> c <span class="kw">in</span> sampler_params)</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>n_treedepth <span class="op">=</span> <span class="bu">sum</span>(<span class="bu">int</span>(np.<span class="bu">sum</span>(np.array(c[<span class="st">'treedepth__'</span>]) <span class="op">&gt;=</span> controls[<span class="st">'max_treedepth'</span>]))</span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>                  <span class="cf">for</span> c <span class="kw">in</span> sampler_params)</span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>n_draws     <span class="op">=</span> <span class="bu">sum</span>(<span class="bu">len</span>(c[<span class="st">'divergent__'</span>]) <span class="cf">for</span> c <span class="kw">in</span> sampler_params)</span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>summary    <span class="op">=</span> fit.summary()</span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a>summary_df <span class="op">=</span> pd.DataFrame(summary[<span class="st">'summary'</span>],</span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a>                          index<span class="op">=</span>summary[<span class="st">'summary_rownames'</span>],</span>
+<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a>                          columns<span class="op">=</span>summary[<span class="st">'summary_colnames'</span>])</span>
+<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-12"><a href="#cb48-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">62</span>)</span>
+<span id="cb48-13"><a href="#cb48-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"divergences        : </span><span class="sc">{</span>n_divergent<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>n_draws<span class="sc">}</span><span class="ss"> (</span><span class="sc">{</span><span class="dv">100</span> <span class="op">*</span> n_divergent <span class="op">/</span> n_draws<span class="sc">:.1f}</span><span class="ss">%)"</span>)</span>
+<span id="cb48-14"><a href="#cb48-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"max_treedepth hits : </span><span class="sc">{</span>n_treedepth<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>n_draws<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb48-15"><a href="#cb48-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"worst R-hat        : </span><span class="sc">{</span>summary_df[<span class="st">'Rhat'</span>]<span class="sc">.</span><span class="bu">max</span>()<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb48-16"><a href="#cb48-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"min n_eff          : </span><span class="sc">{</span>summary_df[<span class="st">'n_eff'</span>]<span class="sc">.</span><span class="bu">min</span>()<span class="sc">:.0f}</span><span class="ss">"</span>)</span>
+<span id="cb48-17"><a href="#cb48-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">62</span>)</span>
+<span id="cb48-18"><a href="#cb48-18" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>==============================================================
+divergences        : 3/2000 (0.1%)
+max_treedepth hits : 0/2000
+worst R-hat        : 1.0084
+min n_eff          : 494
+==============================================================</code></pre>
+</div>
+</div>
+</section>
+<section id="did-we-recover-the-truth" class="level3">
+<h3 class="anchored" data-anchor-id="did-we-recover-the-truth">Did we recover the truth?</h3>
+<p>The luxury of simulated data is that we know the right answers. Two quick checks:</p>
+<ol type="1">
+<li><strong><code>beta_country</code></strong> should recover the country weights we used in Part 2: US 0.20, UK 0.15, India 0.35, China 0.23, Russia 0.11.</li>
+<li><strong><code>sigma_disc_error</code></strong> should recover the <code>DISCOUNT_NOISE_SD = 25</code> we injected earlier.</li>
+</ol>
+<p>The bar is not that the posterior mean is close but that the true value lies inside the credible interval, with intervals that are neither absurdly wide nor suspiciously narrow.</p>
+<div id="993ef50f" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb50"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>country_weights <span class="op">=</span> {</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">'US'</span>: <span class="fl">0.2</span>,</span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'UK'</span>: <span class="fl">0.15</span>,</span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">'India'</span>: <span class="fl">0.35</span>,</span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">'China'</span>: <span class="fl">0.23</span>,</span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Russia'</span>: <span class="fl">0.11</span></span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a>country_lookup <span class="op">=</span> (sim_df[[<span class="st">'country'</span>, <span class="st">'country_index'</span>]]</span>
+<span id="cb50-9"><a href="#cb50-9" aria-hidden="true" tabindex="-1"></a>                  .drop_duplicates()</span>
+<span id="cb50-10"><a href="#cb50-10" aria-hidden="true" tabindex="-1"></a>                  .set_index(<span class="st">'country_index'</span>)[<span class="st">'country'</span>]</span>
+<span id="cb50-11"><a href="#cb50-11" aria-hidden="true" tabindex="-1"></a>                  .to_dict())</span>
+<span id="cb50-12"><a href="#cb50-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-13"><a href="#cb50-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"beta_country recovery:"</span>)</span>
+<span id="cb50-14"><a href="#cb50-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  </span><span class="sc">{</span><span class="st">'country'</span><span class="sc">:&lt;8}</span><span class="ss"> </span><span class="sc">{</span><span class="st">'true'</span><span class="sc">:&gt;6}</span><span class="ss"> </span><span class="sc">{</span><span class="st">'posterior mean'</span><span class="sc">:&gt;15}</span><span class="ss">   95% credible interval"</span>)</span>
+<span id="cb50-15"><a href="#cb50-15" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> idx <span class="kw">in</span> <span class="bu">sorted</span>(country_lookup):</span>
+<span id="cb50-16"><a href="#cb50-16" aria-hidden="true" tabindex="-1"></a>    name <span class="op">=</span> country_lookup[idx]</span>
+<span id="cb50-17"><a href="#cb50-17" aria-hidden="true" tabindex="-1"></a>    row  <span class="op">=</span> summary_df.loc[<span class="ss">f'beta_country[</span><span class="sc">{</span>idx<span class="sc">}</span><span class="ss">]'</span>]</span>
+<span id="cb50-18"><a href="#cb50-18" aria-hidden="true" tabindex="-1"></a>    hit  <span class="op">=</span> <span class="st">"yes"</span> <span class="cf">if</span> row[<span class="st">'2.5%'</span>] <span class="op">&lt;=</span> country_weights[name] <span class="op">&lt;=</span> row[<span class="st">'97.5%'</span>] <span class="cf">else</span> <span class="st">"NO"</span></span>
+<span id="cb50-19"><a href="#cb50-19" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  </span><span class="sc">{</span>name<span class="sc">:&lt;8}</span><span class="ss"> </span><span class="sc">{</span>country_weights[name]<span class="sc">:&gt;6.2f}</span><span class="ss"> </span><span class="sc">{</span>row[<span class="st">'mean'</span>]<span class="sc">:&gt;15.3f}</span><span class="ss">   "</span></span>
+<span id="cb50-20"><a href="#cb50-20" aria-hidden="true" tabindex="-1"></a>          <span class="ss">f"[</span><span class="sc">{</span>row[<span class="st">'2.5%'</span>]<span class="sc">:.3f}</span><span class="ss">, </span><span class="sc">{</span>row[<span class="st">'97.5%'</span>]<span class="sc">:.3f}</span><span class="ss">]   contains truth: </span><span class="sc">{</span>hit<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb50-21"><a href="#cb50-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-22"><a href="#cb50-22" aria-hidden="true" tabindex="-1"></a>row <span class="op">=</span> summary_df.loc[<span class="st">'sigma_disc_error'</span>]</span>
+<span id="cb50-23"><a href="#cb50-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">sigma_disc_error: true </span><span class="sc">{</span>DISCOUNT_NOISE_SD<span class="sc">:.1f}</span><span class="ss">, "</span></span>
+<span id="cb50-24"><a href="#cb50-24" aria-hidden="true" tabindex="-1"></a>      <span class="ss">f"posterior </span><span class="sc">{</span>row[<span class="st">'mean'</span>]<span class="sc">:.2f}</span><span class="ss"> [</span><span class="sc">{</span>row[<span class="st">'2.5%'</span>]<span class="sc">:.2f}</span><span class="ss">, </span><span class="sc">{</span>row[<span class="st">'97.5%'</span>]<span class="sc">:.2f}</span><span class="ss">]"</span>)</span>
+<span id="cb50-25"><a href="#cb50-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-26"><a href="#cb50-26" aria-hidden="true" tabindex="-1"></a><span class="co">### The learned heterogeneity parameters from section 5a</span></span>
+<span id="cb50-27"><a href="#cb50-27" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Learned scale heterogeneity:"</span>)</span>
+<span id="cb50-28"><a href="#cb50-28" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> p <span class="kw">in</span> [<span class="st">'tau_sigma'</span>, <span class="st">'tau_sd'</span>]:</span>
+<span id="cb50-29"><a href="#cb50-29" aria-hidden="true" tabindex="-1"></a>    r <span class="op">=</span> summary_df.loc[p]</span>
+<span id="cb50-30"><a href="#cb50-30" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  </span><span class="sc">{</span>p<span class="sc">:&lt;10}</span><span class="ss"> </span><span class="sc">{</span>r[<span class="st">'mean'</span>]<span class="sc">:.3f}</span><span class="ss"> [</span><span class="sc">{</span>r[<span class="st">'2.5%'</span>]<span class="sc">:.3f}</span><span class="ss">, </span><span class="sc">{</span>r[<span class="st">'97.5%'</span>]<span class="sc">:.3f}</span><span class="ss">]"</span></span>
+<span id="cb50-31"><a href="#cb50-31" aria-hidden="true" tabindex="-1"></a>          <span class="ss">f"   -&gt; a typical one-level move multiplies the scale by "</span></span>
+<span id="cb50-32"><a href="#cb50-32" aria-hidden="true" tabindex="-1"></a>          <span class="ss">f"exp(+/-</span><span class="sc">{</span>r[<span class="st">'mean'</span>]<span class="sc">:.2f}</span><span class="ss">) = [</span><span class="sc">{</span>np<span class="sc">.</span>exp(<span class="op">-</span>r[<span class="st">'mean'</span>])<span class="sc">:.2f}</span><span class="ss">, </span><span class="sc">{</span>np<span class="sc">.</span>exp(r[<span class="st">'mean'</span>])<span class="sc">:.2f}</span><span class="ss">]"</span>)</span>
+<span id="cb50-33"><a href="#cb50-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-34"><a href="#cb50-34" aria-hidden="true" tabindex="-1"></a><span class="co">### And the within-group scales</span></span>
+<span id="cb50-35"><a href="#cb50-35" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">sigma_sw_version posterior means:"</span>)</span>
+<span id="cb50-36"><a href="#cb50-36" aria-hidden="true" tabindex="-1"></a>sw_sigma <span class="op">=</span> summary_df.loc[[i <span class="cf">for</span> i <span class="kw">in</span> summary_df.index <span class="cf">if</span> i.startswith(<span class="st">'sigma_sw_version'</span>)], <span class="st">'mean'</span>]</span>
+<span id="cb50-37"><a href="#cb50-37" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  range: [</span><span class="sc">{</span>sw_sigma<span class="sc">.</span><span class="bu">min</span>()<span class="sc">:.1f}</span><span class="ss">, </span><span class="sc">{</span>sw_sigma<span class="sc">.</span><span class="bu">max</span>()<span class="sc">:.1f}</span><span class="ss">]"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>beta_country recovery:
+  country    true  posterior mean   95% credible interval
+  UK         0.15           0.149   [0.146, 0.152]   contains truth: yes
+  India      0.35           0.348   [0.346, 0.350]   contains truth: yes
+  US         0.20           0.202   [0.200, 0.205]   contains truth: yes
+  China      0.23           0.230   [0.228, 0.232]   contains truth: yes
+  Russia     0.11           0.108   [0.103, 0.112]   contains truth: yes
+
+sigma_disc_error: true 25.0, posterior 25.31 [24.28, 26.36]
+
+Learned scale heterogeneity:
+  tau_sigma  0.343 [0.223, 0.554]   -&gt; a typical one-level move multiplies the scale by exp(+/-0.34) = [0.71, 1.41]
+  tau_sd     1.040 [0.226, 1.801]   -&gt; a typical one-level move multiplies the scale by exp(+/-1.04) = [0.35, 2.83]
+
+sigma_sw_version posterior means:
+  range: [93.5, 439.9]</code></pre>
+</div>
+</div>
+</section>
+<section id="save-the-fitted-model" class="level3">
+<h3 class="anchored" data-anchor-id="save-the-fitted-model">Save the fitted model</h3>
+<p>Compilation and sampling are expensive so persist both the compiled model and the fit so evaluation can happen in a fresh session.</p>
+<div id="96dcc042" class="cell" data-execution_count="29">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb52"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>output_file <span class="op">=</span> configs[<span class="st">'output_filepath'</span>] <span class="op">+</span> <span class="st">"model_fit_1.6_small_v1.pkl"</span></span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(output_file, <span class="st">"wb"</span>) <span class="im">as</span> f:</span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>    pickle.dump({<span class="st">'model'</span>: model, <span class="st">'fit'</span>: fit}, f, protocol<span class="op">=-</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<hr>
+<p>← <a href="../bayesian-modelling-part-2/index.html">Part 2: Simulated Data Generation</a></p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/roy-ananya\.github\.io\/blog\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+<script src="../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

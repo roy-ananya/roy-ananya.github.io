@@ -1,0 +1,1594 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Simulated Data Generation – Ananya Roy — Writing</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-acf12a64177840b8d86f2d4f01b2e9fb.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-b3dda39ca223c1c8a2b382b3a982b632.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+<script src="../theme-sync.js"></script>
+
+
+<link rel="stylesheet" href="../../themes.css">
+<link rel="stylesheet" href="../../style.css">
+<link rel="stylesheet" href="../article.css">
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Ananya Roy</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">← Back to portfolio</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/ananyaaroy1"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/ananya-roy-62131220/"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#the-traditional-ml-vs.-bayesian-approach-workflow" id="toc-the-traditional-ml-vs.-bayesian-approach-workflow" class="nav-link active" data-scroll-target="#the-traditional-ml-vs.-bayesian-approach-workflow">The Traditional ML vs.&nbsp;Bayesian Approach Workflow</a></li>
+  <li><a href="#a-real-world-business-problem" id="toc-a-real-world-business-problem" class="nav-link" data-scroll-target="#a-real-world-business-problem">A Real World Business Problem</a>
+  <ul class="collapse">
+  <li><a href="#data-exploration" id="toc-data-exploration" class="nav-link" data-scroll-target="#data-exploration">Data Exploration</a></li>
+  <li><a href="#why-understanding-data-generation-matters" id="toc-why-understanding-data-generation-matters" class="nav-link" data-scroll-target="#why-understanding-data-generation-matters">Why Understanding Data Generation Matters</a></li>
+  <li><a href="#the-simulation-first-approach-building-from-the-ground-up" id="toc-the-simulation-first-approach-building-from-the-ground-up" class="nav-link" data-scroll-target="#the-simulation-first-approach-building-from-the-ground-up">The Simulation-First Approach: Building from the Ground Up</a></li>
+  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Simulated Data Generation</h1>
+<p class="subtitle lead">Stress-testing hierarchical Bayesian models with synthetic data — Part 2</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">bayesian</div>
+    <div class="quarto-category">ml</div>
+    <div class="quarto-category">math</div>
+  </div>
+  </div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">June 2021</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>In <a href="../bayesian-modelling-part-1/index.html">Part 1</a>, we got an introduction to probabilistic bayesian models and how it differs from traditional machine learning. Now, we will apply the bayesian approach of modelling to a business problem that was introduced in <a href="../bayesian-modelling-part-1/index.html">Part 1</a>.</p>
+<section id="the-traditional-ml-vs.-bayesian-approach-workflow" class="level2">
+<h2 class="anchored" data-anchor-id="the-traditional-ml-vs.-bayesian-approach-workflow">The Traditional ML vs.&nbsp;Bayesian Approach Workflow</h2>
+<p>For most of us working in traditional machine learning, the workflow is very clearly defined.</p>
+<pre><code> Data → Features → Model → Evaluate → Improve → Deploy → Monitor</code></pre>
+<ol type="1">
+<li>Understand the business problem
+<ul>
+<li>What are you trying to solve? What are the business metrics and technical metrics you need to optimise?</li>
+</ul></li>
+<li>Data Ingestion Pipeline:
+<ul>
+<li>Identify the various data sources</li>
+<li>Get data from various sources like databases, API’s, scraping etc</li>
+<li>Perform EDA(Exploratory Data Analysis) i.e understand the data and how it relates to the business problem and what we’re trying to solve, explore/visualize data distributions, find outliers, etc</li>
+</ul></li>
+<li>Data Cleaning / Pre-processing Pipeline:
+<ul>
+<li>Handle missing values in data, remove duplicate data, convert data types, convert data into correct categories (example - encode categorical data into numeric data ), etc</li>
+<li>Scale or normalise data</li>
+</ul></li>
+<li>Feature Engineering:
+<ul>
+<li>Create new features - either by using business logic</li>
+<li>Select features with highest predictive value</li>
+<li>Drp redundant features</li>
+</ul></li>
+<li>Train Model:
+<ul>
+<li>Split the data into training (~70%), validation(~10%), test set(~20%) depending on the use case</li>
+<li>Train model on the training data (start wth a simple classifier/model to create a baseline model and gradually increase complexity and evaluate model performance)</li>
+</ul></li>
+<li>Model Evaluation:
+<ul>
+<li>Measure performance on validation sets, finetune hyperparamaeters, etc</li>
+<li>Report performance metrics depending on the business problem like AUC, accuracy, etc</li>
+</ul></li>
+<li>Model Deployment and Monitoring:
+<ul>
+<li>Deploy the model - through an API service, etc</li>
+<li>Serve predictions and monitor performance measuring for data drift, model drift</li>
+<li>Re-training model on new data</li>
+</ul></li>
+</ol>
+<p>In traditional machine learning, there’s a linear progression from observations/data to training model and deploying it in production i.e the data comes first and validation takes place at the end.</p>
+<p>But Bayesian modeling turns this paradigm on its head, demanding something that initially feels counterintuitive i.e understanding your data-generating mechanism before you even touch the real data. This approach, championed by researchers like Michael Betancourt in his principled Bayesian workflow, treats simulation not as an afterthought, but as the foundation of robust model development.</p>
+<p>To see it action, we will go through a real world example.</p>
+</section>
+<section id="a-real-world-business-problem" class="level2">
+<h2 class="anchored" data-anchor-id="a-real-world-business-problem">A Real World Business Problem</h2>
+<p>In part1, we briefly discussed the business problem which seems particularly well suited for the bayesian approach.</p>
+<p>Here’s the problem statement:</p>
+<p>Imagine you’re working for an game app development platform facing a complex business problem. Your marketing team needs to identify potential users to target, but you’re dealing with intricate hierarchical relationships across multiple dimensions:</p>
+<ul>
+<li>Operating Systems: iOS and Android with different user behaviors</li>
+<li>Device Types: iPhone, iPad, Samsung, Huawei, Nokia with varying engagement patterns</li>
+<li>Software Versions: Multiple versions within each device type</li>
+<li>Geographic Markets: Different countries with distinct economic patterns</li>
+<li>Revenue Dynamics: Complex relationships between device types, markets, and monetization</li>
+</ul>
+<p>Your goal is to predict revenue from app installations.</p>
+<section id="data-exploration" class="level3">
+<h3 class="anchored" data-anchor-id="data-exploration">Data Exploration</h3>
+<p>After exploring the data, there weer a few things that jumped at me,</p>
+<ol type="1">
+<li>the hierarchical relationships in the data and</li>
+<li>the cold start problem, i.e there are subsets of the data which has low sample sizes and others have large sample sizes. These situations are not somehow unique to this problem - it occurs quite often in many machine learning problems.</li>
+</ol>
+<p>But traditional ML approaches struggle with this hierarchical complexity and cold-start scenarios where new device types or markets have limited historical data.</p>
+</section>
+<section id="why-understanding-data-generation-matters" class="level3">
+<h3 class="anchored" data-anchor-id="why-understanding-data-generation-matters">Why Understanding Data Generation Matters</h3>
+<p>As Betancourt emphasizes in his principled workflow, a probabilistic model is only as useful as its consistency with the underlying data-generating process. Before building any model, we need to answer some fundamental questions:</p>
+<ul>
+<li>What generates the hierarchical structure? How do users choose between iOS and Android? How does device preference vary by geography?</li>
+<li>What drives revenue patterns? Why do iPhone users generate different revenue than Samsung users? How do country-specific economic factors influence spending?</li>
+<li>What creates the dependency relationships? How does software version adoption relate to device type? How do market dynamics influence user behavior?</li>
+</ul>
+<p>Without understanding these mechanisms, we’re building models on weak foundations. This is why it’s crucial to do a thorough data exploration, analysis and talk to the subject matter domain experts and incorporate their intuition and understanding in our modelling approach.</p>
+</section>
+<section id="the-simulation-first-approach-building-from-the-ground-up" class="level3">
+<h3 class="anchored" data-anchor-id="the-simulation-first-approach-building-from-the-ground-up">The Simulation-First Approach: Building from the Ground Up</h3>
+<p>Rather than jumping directly to modelling with real data, the Bayesian approach starts with explicit data-generating mechanisms to generate simulated data and build models first on them before using any real data. Simulating a dataset is not as easy as it sounds - the first critical step is what we do for traditional machine learning development - EDA (exploratory data analysis). We need to have a strong understanding of the various features, their distributions, how the features correlate or interact with each other, how the data gets generated, etc. Once you have a solid grasp of the data generating mechanism, you can start simulating the data.</p>
+<p>Let’s examine how this works in practice using our game app platform scenario. First, a quick glimpse of the real data provided by the business. We won’t walk through the exploration of the real data here; assume that has already been done. The insights learned from it, together with business/domain knowledge from SMEs, have been built into the simulated data. In this post we explore the simulated data and confirm that its patterns match what we saw in the real data. The bayesian model is then fitted to the simulated data first (in <a href="../bayesian-modelling-part-3/index.html">Part 3</a>).</p>
+<div id="7bdb4923" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> csv</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lib.data_helper_utilities <span class="im">import</span> SimulatedDataGenerator</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lib.data_helper_utilities <span class="im">import</span> get_configs</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co"># sim_df = SimulatedDataGenerator.generate_simulated_data()</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># sim_df.head()</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>configurations_filepath <span class="op">=</span> <span class="st">"&lt;your_config_filepath&gt;"</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>configs <span class="op">=</span> get_configs(configurations_filepath <span class="op">+</span> <span class="st">'configs.yaml'</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>real_df <span class="op">=</span> pd.read_csv(</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    configs[<span class="st">'input_data_filepath'</span>] <span class="op">+</span> <span class="st">'training_data.csv'</span>,</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    delimiter<span class="op">=</span><span class="st">';'</span>,</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    quoting<span class="op">=</span>csv.QUOTE_NONE,  <span class="co"># some deviceType values contain stray quote characters</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    on_bad_lines<span class="op">=</span><span class="st">'skip'</span>,</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    encoding_errors<span class="op">=</span><span class="st">'replace'</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="co"># deviceType column contains embedded tabs (e.g. "iPhone8\t2" → "iPhone8,2")</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>real_df[<span class="st">'deviceType'</span>] <span class="op">=</span> real_df[<span class="st">'deviceType'</span>].<span class="bu">str</span>.replace(<span class="st">'</span><span class="ch">\t</span><span class="st">'</span>, <span class="st">','</span>, regex<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>real_df <span class="op">=</span> real_df[[<span class="st">"id"</span>,<span class="st">"campaignId"</span>,<span class="st">"timestamp"</span>,<span class="st">"country"</span>,<span class="st">"platform"</span>,<span class="st">"softwareVersion"</span>,<span class="st">"deviceType"</span>,<span class="st">"connectionType"</span>,<span class="st">"installCount"</span>,<span class="st">"revenue"</span>,<span class="st">"discount"</span>]]</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Shape of real dataset = </span><span class="sc">{}</span><span class="st">"</span>.<span class="bu">format</span>(real_df.shape))</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>real_df.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Shape of real dataset = (3738937, 11)</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">id</th>
+<th data-quarto-table-cell-role="th">campaignId</th>
+<th data-quarto-table-cell-role="th">timestamp</th>
+<th data-quarto-table-cell-role="th">country</th>
+<th data-quarto-table-cell-role="th">platform</th>
+<th data-quarto-table-cell-role="th">softwareVersion</th>
+<th data-quarto-table-cell-role="th">deviceType</th>
+<th data-quarto-table-cell-role="th">connectionType</th>
+<th data-quarto-table-cell-role="th">installCount</th>
+<th data-quarto-table-cell-role="th">revenue</th>
+<th data-quarto-table-cell-role="th">discount</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>5c36658fb58fad351175f0b6</td>
+<td>59687f0d896a6b0e5ce6ea15</td>
+<td>2019-01-09T21:20:15.943+00:00</td>
+<td>US</td>
+<td>ios</td>
+<td>11.4.1</td>
+<td>iPhone8,2</td>
+<td>cellular</td>
+<td>2</td>
+<td>1853.55</td>
+<td>370.71</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>5c38d5ab1c16172870186b5a</td>
+<td>59687f0d896a6b0e5ce6ea15</td>
+<td>2019-01-11T17:43:07.609+00:00</td>
+<td>US</td>
+<td>ios</td>
+<td>12.1</td>
+<td>iPhone9,1</td>
+<td>cellular</td>
+<td>0</td>
+<td>1331.94</td>
+<td>266.39</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>5c38815de8f4e50e256e4f9c</td>
+<td>59687f0d896a6b0e5ce6ea15</td>
+<td>2019-01-11T11:43:25.168+00:00</td>
+<td>US</td>
+<td>ios</td>
+<td>12.1.2</td>
+<td>iPhone7,1</td>
+<td>cellular</td>
+<td>0</td>
+<td>1640.25</td>
+<td>328.05</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>5c409ace532d5806d2c6a5e6</td>
+<td>59687f0d896a6b0e5ce6ea15</td>
+<td>2019-01-17T15:10:06.420+00:00</td>
+<td>US</td>
+<td>ios</td>
+<td>12.1.2</td>
+<td>iPhone7,2</td>
+<td>wifi</td>
+<td>0</td>
+<td>1494.49</td>
+<td>298.90</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>5c3904b92d798c41e7f3088a</td>
+<td>59687f0d896a6b0e5ce6ea15</td>
+<td>2019-01-11T21:03:53.145+00:00</td>
+<td>US</td>
+<td>ios</td>
+<td>12.0.1</td>
+<td>iPhone8,1</td>
+<td>cellular</td>
+<td>0</td>
+<td>1980.84</td>
+<td>396.17</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<section id="from-real-data-to-simulated-data" class="level4">
+<h4 class="anchored" data-anchor-id="from-real-data-to-simulated-data">From real data to simulated data</h4>
+<p>The real data has already been explored, and the key business insights drawn from it, together with input from business SMEs, have been built into the simulated data. In the rest of this post we explore the simulated data and confirm that its patterns match what we saw in the real data and what the business expects.</p>
+</section>
+<section id="generating-simulated-data" class="level4">
+<h4 class="anchored" data-anchor-id="generating-simulated-data">Generating simulated data</h4>
+<p>We generate four simulated datasets: <code>extra_small</code>, <code>small</code>, <code>medium</code> and <code>large</code>. Stan takes several minutes to hours to train a model on the medium and large datasets, whereas the smaller ones train in seconds, which helps with faster development. For the data generating process itself, it’s crucial to explore the distribution of each feature in the real dataset and replicate it in the simulated dataset. We won’t go into how the simulated data was generated (that is simple enough once you’ve explored the real data distributions) and will instead explore the patterns we see in the simulated dataset. In the rest of the notebook, we will look at the <code>medium</code> dataset.</p>
+<div id="6788030a" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">###################################################################</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co">### Loading/Generating Simulated Dataset</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">###################################################################</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> yaml</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pickle</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co"># import stan_utility</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> helper_utilities <span class="im">as</span> helper</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co"># from importlib import reload  </span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co"># reload(helper)</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co">### Add to try to run the earlier pystan version</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> multiprocessing</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="co"># multiprocessing.set_start_method("fork")</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">12345678</span>)</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="co"># configurations_filepath = "&lt;your_config_filepath&gt;"</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>configs <span class="op">=</span> helper.get_configs(configurations_filepath <span class="op">+</span> <span class="st">'configs.yaml'</span>)</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="co"># sim_df = helper.generate_simulated_data(configs,num_total_samples=100)</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="co"># sim_df = pd.read_csv(configs['input_data_filepath'] + 'simulated_data_small.csv')</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>sim_df <span class="op">=</span> pd.read_csv(configs[<span class="st">'input_data_filepath'</span>] <span class="op">+</span> <span class="st">'simulated_data_medium.csv'</span>)</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>country_weights <span class="op">=</span> {</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>    <span class="st">'US'</span>: <span class="fl">0.2</span>,</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>    <span class="st">'UK'</span>: <span class="fl">0.15</span>,</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>    <span class="st">'India'</span>:<span class="fl">0.35</span>,</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>    <span class="st">'China'</span>:<span class="fl">0.23</span>,</span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Russia'</span>:<span class="fl">0.11</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>sim_df[<span class="st">'discount'</span>] <span class="op">=</span> sim_df[[<span class="st">'country'</span>,<span class="st">'revenue'</span>]].<span class="bu">apply</span>(<span class="kw">lambda</span> s: country_weights[<span class="bu">str</span>(s[<span class="st">'country'</span>])]<span class="op">*</span>s[<span class="st">'revenue'</span>], axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a><span class="co">### Add the observation noise the discount column is missing above.</span></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>DISCOUNT_NOISE_SD <span class="op">=</span> <span class="fl">25.0</span></span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> DISCOUNT_NOISE_SD <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>    rng   <span class="op">=</span> np.random.default_rng(<span class="dv">12345678</span>)</span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>    noisy <span class="op">=</span> sim_df[<span class="st">'discount'</span>] <span class="op">+</span> rng.normal(<span class="dv">0</span>, DISCOUNT_NOISE_SD, sim_df.shape[<span class="dv">0</span>])</span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>    <span class="co">### Discount can't be negative so Stan declares `vector&lt;lower=0&gt;[num_samples] discount`</span></span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>    n_clipped <span class="op">=</span> <span class="bu">int</span>((noisy <span class="op">&lt;</span> <span class="dv">0</span>).<span class="bu">sum</span>())</span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> n_clipped:</span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"WARNING: clipped </span><span class="sc">{</span>n_clipped<span class="sc">}</span><span class="ss"> negative discount value(s) at 0"</span>)</span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>    sim_df[<span class="st">'discount'</span>] <span class="op">=</span> noisy.clip(lower<span class="op">=</span><span class="fl">0.0</span>)</span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Shape of simulated dataset = </span><span class="sc">{}</span><span class="st">"</span>.<span class="bu">format</span>(sim_df.shape))</span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>sim_df.head() </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>WARNING: clipped 1 negative discount value(s) at 0
+Shape of simulated dataset = (5000, 12)</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="8">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">country</th>
+<th data-quarto-table-cell-role="th">os</th>
+<th data-quarto-table-cell-role="th">device_type</th>
+<th data-quarto-table-cell-role="th">software_version</th>
+<th data-quarto-table-cell-role="th">discount</th>
+<th data-quarto-table-cell-role="th">install</th>
+<th data-quarto-table-cell-role="th">revenue</th>
+<th data-quarto-table-cell-role="th">country_index</th>
+<th data-quarto-table-cell-role="th">id_index</th>
+<th data-quarto-table-cell-role="th">os_index</th>
+<th data-quarto-table-cell-role="th">device_type_index</th>
+<th data-quarto-table-cell-role="th">software_version_index</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>UK</td>
+<td>ios</td>
+<td>iphone</td>
+<td>i1.0.3</td>
+<td>228.372327</td>
+<td>0.0</td>
+<td>1583.502453</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>3</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>India</td>
+<td>ios</td>
+<td>iphone</td>
+<td>i1.0.3</td>
+<td>639.300936</td>
+<td>1.0</td>
+<td>1945.870268</td>
+<td>2</td>
+<td>2</td>
+<td>1</td>
+<td>1</td>
+<td>3</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>India</td>
+<td>android</td>
+<td>samsung</td>
+<td>s1.3</td>
+<td>243.068706</td>
+<td>1.0</td>
+<td>758.723952</td>
+<td>2</td>
+<td>3</td>
+<td>2</td>
+<td>3</td>
+<td>8</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>India</td>
+<td>ios</td>
+<td>iphone</td>
+<td>i1.0.3</td>
+<td>893.533240</td>
+<td>0.0</td>
+<td>2643.221968</td>
+<td>2</td>
+<td>4</td>
+<td>1</td>
+<td>1</td>
+<td>3</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>US</td>
+<td>ios</td>
+<td>iphone</td>
+<td>i1.0.3</td>
+<td>363.945812</td>
+<td>0.0</td>
+<td>1825.715537</td>
+<td>3</td>
+<td>5</td>
+<td>1</td>
+<td>1</td>
+<td>3</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="distribution-by-countries---india-china-dominate" class="level4">
+<h4 class="anchored" data-anchor-id="distribution-by-countries---india-china-dominate">Distribution by Countries - India &amp; China Dominate</h4>
+<p>India and China together account for 60% of all observations. Russia is the most underrepresented market (cold-start risk). Another example of a situation where the hierarchical pooling would be useful and estimates for Russia could borrow information from other markets.</p>
+<div id="24a71e0b" class="cell" data-execution_count="34">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>tmp <span class="op">=</span> sim_df[<span class="st">'country'</span>].value_counts()</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>tmp <span class="op">=</span> tmp.reset_index()</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>tmp.columns <span class="op">=</span> [<span class="st">'country'</span>,<span class="st">'count'</span>]</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>tmp[<span class="st">'percentage'</span>] <span class="op">=</span> tmp[<span class="st">'count'</span>] <span class="op">/</span> tmp[<span class="st">'count'</span>].<span class="bu">sum</span>() <span class="op">*</span> <span class="dv">100</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>tmp.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="34">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">country</th>
+<th data-quarto-table-cell-role="th">count</th>
+<th data-quarto-table-cell-role="th">percentage</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>China</td>
+<td>1491</td>
+<td>29.82</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>India</td>
+<td>1480</td>
+<td>29.60</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>US</td>
+<td>1007</td>
+<td>20.14</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>UK</td>
+<td>775</td>
+<td>15.50</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>Russia</td>
+<td>247</td>
+<td>4.94</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="distribution-of-operating-systems" class="level4">
+<h4 class="anchored" data-anchor-id="distribution-of-operating-systems">Distribution of Operating Systems</h4>
+<p>There are clearly more Android users than ios, accounting for 60% of observations.</p>
+<div id="c01686f0" class="cell" data-execution_count="35">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>tmp <span class="op">=</span> sim_df[<span class="st">'os'</span>].value_counts()</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>tmp <span class="op">=</span> tmp.reset_index()</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>tmp.columns <span class="op">=</span> [<span class="st">'os'</span>,<span class="st">'count'</span>]</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>tmp[<span class="st">'percentage'</span>] <span class="op">=</span> tmp[<span class="st">'count'</span>] <span class="op">/</span> tmp[<span class="st">'count'</span>].<span class="bu">sum</span>() <span class="op">*</span> <span class="dv">100</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>tmp.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="35">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">os</th>
+<th data-quarto-table-cell-role="th">count</th>
+<th data-quarto-table-cell-role="th">percentage</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>android</td>
+<td>2990</td>
+<td>59.8</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>ios</td>
+<td>2010</td>
+<td>40.2</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="distribution-by-device-type" class="level4">
+<h4 class="anchored" data-anchor-id="distribution-by-device-type">Distribution by Device Type</h4>
+<p>Samsung is well respresented in the data, followed by Apple devices - iphone amd ipad. Huawei accounts for 15% and Nokia accounts for just 2% - canonical cold start problem . The model will have almost no data to learn from Nokia directly and would need to lean on information from the Android hierarchy.</p>
+<div id="b10cc1df" class="cell" data-execution_count="43">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>tmp <span class="op">=</span> sim_df[<span class="st">'device_type'</span>].value_counts()</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>tmp <span class="op">=</span> tmp.reset_index()</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>tmp.columns <span class="op">=</span> [<span class="st">'device_type'</span>,<span class="st">'count'</span>]</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>tmp[<span class="st">'percentage'</span>] <span class="op">=</span> tmp[<span class="st">'count'</span>] <span class="op">/</span> tmp[<span class="st">'count'</span>].<span class="bu">sum</span>() <span class="op">*</span> <span class="dv">100</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>tmp.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="43">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">device_type</th>
+<th data-quarto-table-cell-role="th">count</th>
+<th data-quarto-table-cell-role="th">percentage</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>samsung</td>
+<td>2131</td>
+<td>42.62</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>iphone</td>
+<td>1235</td>
+<td>24.70</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>ipad</td>
+<td>775</td>
+<td>15.50</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>huawei</td>
+<td>750</td>
+<td>15.00</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>nokia</td>
+<td>109</td>
+<td>2.18</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="distribution-by-software-versions" class="level4">
+<h4 class="anchored" data-anchor-id="distribution-by-software-versions">Distribution by Software Versions</h4>
+<p>For each device type, users mostly use the latest software versions except huawei which has a more even split between different software versions. Nokia again has just one version in the data snd a fairly small sample size and would benefit from learning from the Android family.</p>
+<div id="4689e09f" class="cell" data-execution_count="51">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>tmp <span class="op">=</span> sim_df[[<span class="st">'device_type'</span>,<span class="st">'software_version'</span>]].value_counts()</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>tmp <span class="op">=</span> tmp.reset_index()</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>tmp.columns <span class="op">=</span> [<span class="st">'device_type'</span>,<span class="st">'software_version'</span>,<span class="st">'count'</span>]</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>tmp[<span class="st">'percentage'</span>] <span class="op">=</span> tmp[<span class="st">'count'</span>] <span class="op">/</span> tmp[<span class="st">'count'</span>].<span class="bu">sum</span>() <span class="op">*</span> <span class="dv">100</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>tmp.sort_values(by<span class="op">=</span>[<span class="st">'device_type'</span>,<span class="st">'count'</span>], ascending<span class="op">=</span><span class="va">True</span>, inplace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>tmp</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="51">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">device_type</th>
+<th data-quarto-table-cell-role="th">software_version</th>
+<th data-quarto-table-cell-role="th">count</th>
+<th data-quarto-table-cell-role="th">percentage</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">5</th>
+<td>huawei</td>
+<td>h2.3</td>
+<td>367</td>
+<td>7.34</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">4</th>
+<td>huawei</td>
+<td>h2.2.1</td>
+<td>383</td>
+<td>7.66</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">7</th>
+<td>ipad</td>
+<td>i10.0.1</td>
+<td>316</td>
+<td>6.32</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>ipad</td>
+<td>i10.0.2</td>
+<td>459</td>
+<td>9.18</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">10</th>
+<td>iphone</td>
+<td>i1.0.1</td>
+<td>135</td>
+<td>2.70</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">6</th>
+<td>iphone</td>
+<td>i1.0.2</td>
+<td>354</td>
+<td>7.08</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">1</th>
+<td>iphone</td>
+<td>i1.0.3</td>
+<td>746</td>
+<td>14.92</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">11</th>
+<td>nokia</td>
+<td>n1.1</td>
+<td>109</td>
+<td>2.18</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">9</th>
+<td>samsung</td>
+<td>s1.1</td>
+<td>155</td>
+<td>3.10</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">8</th>
+<td>samsung</td>
+<td>s1.2</td>
+<td>237</td>
+<td>4.74</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>samsung</td>
+<td>s1.3</td>
+<td>742</td>
+<td>14.84</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">0</th>
+<td>samsung</td>
+<td>s1.4</td>
+<td>997</td>
+<td>19.94</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="revenue" class="level4">
+<h4 class="anchored" data-anchor-id="revenue">Revenue</h4>
+<p>Despite Samsung having the most users, iPhone generates the highest per user revenue which is a more premium segment. Samsung is more mid-to-high range segment. Nokia clearly is a budget segment.</p>
+<div id="647cbafe" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>tmp <span class="op">=</span> sim_df.groupby([<span class="st">'device_type'</span>]).agg({<span class="st">'revenue'</span>: [<span class="st">'mean'</span>, <span class="st">'std'</span>]})</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>tmp <span class="op">=</span> tmp.reset_index()</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>tmp</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="14">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">device_type</th>
+<th colspan="2" data-quarto-table-cell-role="th" data-halign="left">revenue</th>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">mean</th>
+<th data-quarto-table-cell-role="th">std</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>huawei</td>
+<td>900.012634</td>
+<td>98.094441</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>ipad</td>
+<td>498.325818</td>
+<td>101.056390</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>iphone</td>
+<td>1986.724591</td>
+<td>411.896195</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>nokia</td>
+<td>509.026020</td>
+<td>105.092448</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>samsung</td>
+<td>1202.451992</td>
+<td>202.628098</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="discounts" class="level4">
+<h4 class="anchored" data-anchor-id="discounts">Discounts</h4>
+<p>Users from India clearly get the most discounts, followed by China, both massive markets but price sensitive users. US and UK gets moderate discounts with Russia with the least discounts but also the smallest market.</p>
+<div id="d651ef8c" class="cell" data-execution_count="12">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>tmp <span class="op">=</span> sim_df.groupby([<span class="st">'country'</span>]).agg({<span class="st">'discount'</span>: [<span class="st">'mean'</span>, <span class="st">'std'</span>,<span class="st">'count'</span>]})</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>tmp <span class="op">=</span> tmp.reset_index()</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>tmp</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="12">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">country</th>
+<th colspan="3" data-quarto-table-cell-role="th" data-halign="left">discount</th>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">mean</th>
+<th data-quarto-table-cell-role="th">std</th>
+<th data-quarto-table-cell-role="th">count</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>China</td>
+<td>282.054242</td>
+<td>130.805671</td>
+<td>1491</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>India</td>
+<td>426.722481</td>
+<td>196.696896</td>
+<td>1480</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>Russia</td>
+<td>131.947245</td>
+<td>62.900337</td>
+<td>247</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>UK</td>
+<td>180.134790</td>
+<td>88.232562</td>
+<td>775</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>US</td>
+<td>250.390472</td>
+<td>118.598203</td>
+<td>1007</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="a5ce99de" class="cell" data-execution_count="13">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>ratio <span class="op">=</span> (sim_df[<span class="st">'discount'</span>] <span class="op">/</span> sim_df[<span class="st">'revenue'</span>]).groupby(sim_df[<span class="st">'country'</span>]).agg([<span class="st">'mean'</span>, <span class="st">'std'</span>])</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"discount / revenue ratio by country:"</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(ratio.<span class="bu">round</span>(<span class="dv">4</span>).to_string())</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">sd(discount) = </span><span class="sc">{</span>sim_df[<span class="st">'discount'</span>]<span class="sc">.</span>std()<span class="sc">:.1f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>discount / revenue ratio by country:
+           mean     std
+country                
+China    0.2300  0.0295
+India    0.3497  0.0312
+Russia   0.1101  0.0307
+UK       0.1487  0.0345
+US       0.1991  0.0302
+
+sd(discount) = 172.4</code></pre>
+</div>
+</div>
+</section>
+<section id="install-rate" class="level4">
+<h4 class="anchored" data-anchor-id="install-rate">Install Rate</h4>
+<p>Samsung has the highest rate of installs - with 75% followed by iphone users. Unsurprisingly, Nokia and ipad have the least install rates.</p>
+<div id="755874be" class="cell" data-execution_count="21">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>tmp <span class="op">=</span> sim_df.groupby([<span class="st">'device_type'</span>]).agg({<span class="st">'install'</span>: [<span class="st">'sum'</span>, <span class="st">'count'</span>]})</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>tmp <span class="op">=</span> tmp.reset_index()</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>tmp.columns <span class="op">=</span> [<span class="st">'device_type'</span>,<span class="st">'install_sum'</span>,<span class="st">'install_count'</span>]</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>tmp[<span class="st">'install_rate'</span>] <span class="op">=</span> tmp[<span class="st">'install_sum'</span>] <span class="op">/</span> tmp[<span class="st">'install_count'</span>]</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>tmp</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="co"># sim_df.columns</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="21">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">device_type</th>
+<th data-quarto-table-cell-role="th">install_sum</th>
+<th data-quarto-table-cell-role="th">install_count</th>
+<th data-quarto-table-cell-role="th">install_rate</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>huawei</td>
+<td>202.0</td>
+<td>750</td>
+<td>0.269333</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>ipad</td>
+<td>177.0</td>
+<td>775</td>
+<td>0.228387</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>iphone</td>
+<td>712.0</td>
+<td>1235</td>
+<td>0.576518</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>nokia</td>
+<td>23.0</td>
+<td>109</td>
+<td>0.211009</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>samsung</td>
+<td>1600.0</td>
+<td>2131</td>
+<td>0.750821</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Most of the data exploration insights are unsurprising and replicates the real world and business situations.</p>
+<p>The above findings also shows us why a bayesian hierarchical model might be a good fit here.</p>
+<ul>
+<li>Imbalanced data groups: Samsung(with the highest number of users) vs Nokia(with the least users) - partial pooling will be essential in learning the parameters</li>
+<li>Revenue Heterogenity: differences between across the device types</li>
+<li>Nested hierarchical Structure: capturing the hierarchical relationships in the data , between operating systems, device types, software versions with country as a cross cutting factor</li>
+<li>Correlated outcome: install and revenue are both device dependent, capturing realistic co-variation</li>
+</ul>
+</section>
+<section id="defining-the-hierarchical-structure" class="level4">
+<h4 class="anchored" data-anchor-id="defining-the-hierarchical-structure">Defining the Hierarchical Structure</h4>
+<p>The data has a 4-level hierarchy - every observation belongs to exactly one path from root to leaf.</p>
+<p><strong>Level 0 - Root</strong> Root level - across all customers</p>
+<p><strong>Level 1 - Operaitng System</strong> There are two groups - ios, which accounts for 40% of the observations and Android, which represents 60% of the data.</p>
+<p><strong>Level 2 - Device Type (child of operating system)</strong> Parent node is operating system and child nodes are the software versions for a given type. Within each OS, device type is assigned conditionally: - iOS users: 61.4% get iPhone, 38.6% get iPad - Android users: 71.3% get Samsung, 25.1% get Huawei, 3.6% get Nokia</p>
+<p><strong>Level 3 - Software Version</strong> - Leaf level node, is the child of device type.</p>
+<p>The hierarchy creates a natural information-sharing structure:</p>
+<ul>
+<li>Nokia (2% of data, 1 version) has almost no data to estimate its parameters from directly. The hierarchical model lets it borrow information from the Android parent — it learns from Samsung and Huawei before relying on its own sparse observations.</li>
+<li>Software versions with low counts (e.g., i1.0.1 at 2.7%, s1.1 at 3.1%) similarly borrow from their device-type parent rather than estimating in isolation.</li>
+<li>A flat model would treat Nokia completely independently, leading to highly uncertain or unreliable estimates. The hierarchy encodes the structural belief that devices within the same OS family behave more similarly to each other than to devices in the other OS family.</li>
+</ul>
+<p>The figure below shows the hierarchical nature in the data.</p>
+<div id="2fd8486c" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lib.visualizations <span class="im">import</span> HierarchicalGraphViz</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lib.data_helper_utilities <span class="im">import</span> nodes_list, edges_list, nodes_colors</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>HierarchicalGraphViz(nodes_list, edges_list, nodes_colors)</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Hierarchy: Root -&gt; OS → Device Type → Software Version -&gt; individual customers '</span>)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-12-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>First, based on our exploratory data analysis, we generate some simulated data and train a bayesian model on the simulated data. Once you’re happy with the results generated on the simulated data, you train the model on actual data. If you notice the model gets stuck in some bad regions of the paramater space, or takes a long time to converge or has divergences etc, you have a problem. It means you perhaps you didn’t understand the data generating mechanism and need to tweak your data simulation pipeline or change your priors/distributions and re-train the model on simulated data followed by training on actual data.</p>
+<hr>
+<p>← <a href="../bayesian-modelling-part-1/index.html">Part 1: A Probabilistic Framework</a> · <a href="../bayesian-modelling-part-3/index.html">Part 3: Building the Hierarchical Model in Stan</a> →</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/roy-ananya\.github\.io\/blog\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+<script src="../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

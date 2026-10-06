@@ -1,95 +1,149 @@
----
-layout: default
-title: Ananya Roy
----
+<!DOCTYPE html>
+<html lang="en" data-theme="paper">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ananya Roy — Portfolio</title>
+  <meta name="description" content="Ananya Roy — ML lead working on Gen AI, NLP, Bayesian methods. Background in pure and applied mathematics (ISI Kolkata, LSE)." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap"
+  />
+
+  <link rel="stylesheet" href="themes.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
 <body>
-    <nav>
-        <ul>
-            <li><a href="#About Me">About Me</a></li>
-            <li><a href="#CV">CV</a></li>
-            <li><a href="#Blog">Blog</a></li>
-            <li><a href="#Contact">Contact</a></li>
-        </ul>
-    </nav>
-    <div id="About Me">
-        <div class="container">
-            <h1>About Me</h1>
-            <p>I work as a Senior Data Scientist at a financial institution where I currently lead various machine learning projects in NLP – like building document classifiers, named entity recognition - to automate routine tasks and assisting in making better strategic decisions. I have over 7 years of experience in building machine learning products from scratch, both frequentist/traditional machine learning and bayesian probabilistic models, and automated and deployed models at scale in production. My previous experience across various sectors like auto, sports has given me the opportunity to work on a diverse set of problems - I built and led the development of critical ML component at an Indian startup, worked on land pricing models for the Goverment of India, worked on cutting edge predictive models in sports modelling. I have experience working with Amazon Web Services and dabble with GCP and am proficient in Python, R, Stan, Tensorflow, etc. </p>
-            
-            <p>I love solving problems and decided to pursue an undergraduate degree in Pure Mathematics from University of Delhi, Sri Venkateswara College and fell in love with it. Thereafter, I did my masters in Pure Math and gained some research experience at the Indian Statistical Institute(ISI), Kolkata, India. During this time, I gravitated towards Applied Math and decided to go for another Masters in Applied/Financial Math from the London School of Economics(LSE), UK where I took some courses in financial math. I particularly enjoyed Stochastic Calculus and solving SDE's! I also gained an interest in Machine Learning/ Deep Learning at the time and on doing some initial reading, I really enjoyed the theoretical math behind the ML algorithms and applying it to actual problems. What captivated my attention was the ability to see your model being   
-            </p>
-            
-            <p>
-            </p>
-        </div><!-- /.container -->
-    </div><!-- /.About -->
-    
-    <div id="Contact">
-        <h1>Contact Me</h1>
-        <li><a href="mailto:ananyaaroy1@gmail.com / a.roy2@alumni.lse.ac.uk">Email: ananyaaroy1@gmail.com / a.roy2@alumni.lse.ac.uk</a></li>
-        <li><a href="https://github.com/roy-ananya">Github: github.com/roy-ananya</a></li>
-        <li><a href="https://www.linkedin.com/in/ananya-roy-62131220/">LinkedIn: Ananya Roy</a></li>
+  <nav class="nav" aria-label="Primary">
+    <div class="nav-inner">
+      <a href="#about-me" class="logo">Ananya Roy</a>
+
+      <button
+        class="nav-toggle"
+        type="button"
+        aria-label="Toggle navigation"
+        aria-expanded="false"
+        aria-controls="nav-links nav-social"
+      >☰</button>
+
+      <div class="nav-links" id="nav-links">
+        <a href="#about-me">About Me</a>
+        <a href="#resume">Resume</a>
+        <a href="#technical-blog">Technical Blog</a>
+        <a href="#miscellaneous">Miscellaneous</a>
+        <a href="#contact-me">Contact Me</a>
+      </div>
+
+      <div class="nav-social" id="nav-social">
+        <a href="https://www.linkedin.com/in/ananya-roy-62131220/" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="https://github.com/ananyaaroy1" target="_blank" rel="noopener">GitHub</a>
+        <button id="theme-switch" class="theme-switch" type="button" aria-label="Switch to dark theme" aria-pressed="false"></button>
+      </div>
     </div>
-    
-    <div id="Blog">
-        <h1>Blog</h1>
-            <div class="container">
-                <div class="row">
-                    <div class="project shadow-large">
-                        <div class="project-image">
-                            <img src="images/pipeline_workflow_view.PNG" />
-                        </div>
-                        <!-- End .project-image -->
-                        <div class="project-info">
-                            <h2>Using AWS Data Pipelines for Scheduling Jobs</h2>
-                            <a href="https://github.com/roy-ananya/roy-ananya.github.io/blob/master/blog/aws_data_pipeline/demo_test_pipeline.ipynb">Click Here For More</a>
-                        </div>
-                        <!-- End .project-info -->
-                    </div>
-                    <!-- End .project -->
-                </div>
-            </div>
+  </nav>
 
-            <div class="container">
-                <div class="row">
-                    <div class="project shadow-large">
-                        <div class="project-image">
-                            <img src="images/fractal.PNG" />
-                        </div>
-                        <!-- End .project-image -->
-                        <div class="project-info">
-                            <h2>IVT: A class of Discrete Dynamical Systems</h2>
-                            <a href="https://arxiv.org/ftp/arxiv/papers/1107/1107.1031.pdf">Click Here For More</a>
-                        </div>
-                        <!-- End .project-info -->
-                    </div>
-                    <!-- End .project -->
-                </div>
-            </div>
-        
-            <div class="container">
-                <div class="row">
-                    <div class="project shadow-large">
-                        <div class="project-image">
-                            <img src="images/ivt_math.PNG" />
-                        </div>
-                        <!-- End .project-image -->
-                        <div class="project-info">
-                            <h2>Math of IVT</h2>
-                            <a href="https://www.isical.ac.in/~hmg/HMG_files/Maths%20of%20IVT.pdf">Click Here For More</a>
-                        </div>
-                        <!-- End .project-info -->
-                    </div>
-                    <!-- End .project -->
-                </div>
-            </div>
+  <main class="main">
+    <section class="section" id="about-me">
+      <h2 class="h2">About Me</h2>
+      <div class="about-grid">
+        <div class="portrait">
+          <img src="images/AnanyaRoyHeadshotPic2023.jpg" alt="Ananya Roy" />
+        </div>
+        <div class="about-body">
+          <p>I lead a machine learning team at a financial institution and have been working in the space for the past 15 years. My expertise is in Agentic AI, Gen AI, NLP, Traditional Machine Learning algorithms and Bayesian methods. I have consistently delivered core machine learning services with strong business value from conception to implementation — production systems that stood the test of time in financial services, sports-betting, and e-commerce. With a passion for turning complex data into actionable insights, I strive to take data science and AI beyond the prototype stage, into production systems that deliver real, measurable value to the business.</p>
+          <p>Most of all, I love solving complex problems. My background is in Pure and Applied Mathematics with a smattering of financial mathematics. I did my undergrad and grad in Pure Math and gained some research experience at the Indian Statistical Institute (ISI), Kolkata. During this time I gravitated towards Applied Math and went on to a second Masters in Applied / Financial Math at the London School of Economics (LSE), where I was drawn to Stochastic Calculus and Quantitative Finance. At LSE, I was introduced to Machine Learning and Deep Learning and I really enjoyed the theoretical math behind the algorithms and applying it to real problems.</p>
+          <p>I love learning new things - that happens to be Agentic AI lately - and I hold a few patents. I have been enjoying using AI tools - Claude Code is my favourite so far. I like using em-dashes, even prior to ChatGPT so not every em-dash here is AI-generated :) </p>
+        </div>
+      </div>
+    </section>
 
+    <section class="section" id="resume">
+      <h2 class="h2">Resume</h2>
+      <div class="center">
+        <a class="button" href="resume/Ananya_Roy_CV_G_2026_09.pdf" target="_blank" rel="noopener">View My Resume →</a>
+      </div>
+    </section>
 
-    </div>
-    
-<!--     <footer>
-        <ul>
+    <section class="section" id="technical-blog">
+      <h2 class="h2">Technical Blog</h2>
+      <div class="blog-grid">
+        <article class="blog-post">
+          <div class="blog-img">
+            <img src="blog/bayesian-modelling-part-1/prior_posterior_bayesian_model_part1.png" alt="" />
+          </div>
+          <div class="blog-body">
+            <h3 class="h3">A Probabilistic Framework — Hierarchical Bayesian Modelling, Part 1</h3>
+            <a class="button" href="blog/bayesian-modelling-part-1/index.html">Read More →</a>
+          </div>
+        </article>
 
-        </ul>
-    </footer> -->
+        <article class="blog-post">
+          <div class="blog-img">
+            <img src="blog/bayesian-modelling-part-2/hierarchy_for_bayesian_model_part2.png" alt="" />
+          </div>
+          <div class="blog-body">
+            <h3 class="h3">Simulated Data Generation — Hierarchical Bayesian Modelling, Part 2</h3>
+            <a class="button" href="blog/bayesian-modelling-part-2/index.html">Read More →</a>
+          </div>
+        </article>
+
+        <article class="blog-post">
+          <div class="blog-img">
+            <img src="blog/bayesian-modelling-part-3/funnel_bowl_centered_parametrization_part3.png" alt="" />
+          </div>
+          <div class="blog-body">
+            <h3 class="h3">Building the Hierarchical Model in Stan — Hierarchical Bayesian Modelling, Part 3</h3>
+            <a class="button" href="blog/bayesian-modelling-part-3/index.html">Read More →</a>
+          </div>
+        </article>
+
+        <article class="blog-post">
+          <div class="blog-img">
+            <img src="blog/aws_data_pipeline/pipeline_workflow_view.PNG" alt="" />
+          </div>
+          <div class="blog-body">
+            <h3 class="h3">Using AWS Data Pipelines for Scheduling Jobs</h3>
+            <a class="button" href="blog/aws_data_pipeline/index.html">Read More →</a>
+          </div>
+        </article>
+
+        <article class="blog-post">
+          <div class="blog-img">
+            <img src="blog/stochastic_calculus/dissertation_image.png" alt="" />
+          </div>
+          <div class="blog-body">
+            <h3 class="h3">Stochastic Calculus — Introduction &amp; Applications</h3>
+            <a class="button" href="blog/stochastic_calculus/Dissertation.pdf" target="_blank" rel="noopener">Read More →</a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="miscellaneous">
+      <h2 class="h2">Miscellaneous</h2>
+      <div class="misc">
+        <p>Beyond my professional work, I'm passionate about long walks, longer books - both fiction and non-fiction, hiking, watching cerebral shows and movies or anything sci-fi, going for concerts. If I'm not doing any of the above, then I'm overthinking :)</p>
+        <div class="center">
+          <a class="button" href="#contact-me">Learn More About Me</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="contact-me">
+      <h2 class="h2">Contact Me</h2>
+      <form class="form" id="contact-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST" novalidate>
+        <input type="text" name="name" placeholder="Name" required autocomplete="name" />
+        <input type="email" name="email" placeholder="Email" required autocomplete="email" />
+        <textarea name="message" placeholder="Message" rows="4" required></textarea>
+        <button type="submit">Send Message</button>
+        <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+  </main>
+
+  <script src="script.js" defer></script>
 </body>
+</html>

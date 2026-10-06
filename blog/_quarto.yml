@@ -1,0 +1,60 @@
+# Quarto config for the technical blog.
+# Project root is /blog so rendered output sits next to each notebook source
+# at blog/<slug>/index.html — the URL the portfolio links to.
+#
+# After editing a notebook, render with:
+#   cd blog && quarto render
+# (or `quarto render <slug>/index.ipynb` to render one post.)
+
+project:
+  type: website
+  output-dir: .
+  render:
+    - "*/index.ipynb"
+    - "*/index.qmd"
+
+website:
+  title: "Ananya Roy — Writing"
+  site-url: "https://roy-ananya.github.io/blog/"
+  description: "Notes on Bayesian modelling, ML systems, and the maths behind them."
+  navbar:
+    background: light
+    title: false
+    left:
+      - text: "Ananya Roy"
+        href: ../index.html
+      - text: "← Back to portfolio"
+        href: ../index.html
+    right:
+      - icon: github
+        href: https://github.com/ananyaaroy1
+      - icon: linkedin
+        href: https://www.linkedin.com/in/ananya-roy-62131220/
+
+# Posts carry approximate dates (e.g. "2019-05"), so show month + year only.
+date-format: "MMMM YYYY"
+
+format:
+  html:
+    theme: cosmo
+    include-in-header:
+      text: |
+        <script src="../theme-sync.js"></script>
+    css:
+      - ../themes.css
+      - ../style.css
+      - article.css
+    toc: true
+    toc-location: right
+    toc-depth: 3
+    toc-title: "On this page"
+    code-fold: false
+    code-tools: true
+    code-copy: true
+    highlight-style: github
+    html-math-method: katex
+    fig-format: svg
+    smooth-scroll: true
+    link-external-newwindow: true
+    page-layout: article
+    anchor-sections: true

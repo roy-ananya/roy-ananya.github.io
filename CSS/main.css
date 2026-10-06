@@ -1,41 +1,230 @@
+:root {
+  --primary-color: #034688;
+}
+
 body {
-    margin: 60px auto;
-    width: 70%;
+  background: white;
+  margin: 60px auto;
+  width: 100%;
 }
-nav ul, footer ul {
-    font-family:'Helvetica', 'Arial', 'Sans-Serif';
-    padding: 10px;
-    list-style: none;
-    font-weight: bold;
+
+.topbar {
+  background: #9e9c9c;
+  justify-content: space-between;
+  padding: 1em;
+  color: var(--primary-color);
 }
-nav ul li, footer ul li {
-    display: inline;
-    margin-right: 20px;
+.topbar .linkedin-logo img {
+  display: block;
+  width: 40%;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  height: auto;
+  font-size: 1em;
+  max-width: 100%;
 }
+.topbar .github-logo img {
+  display: block;
+  width: 20%;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  height: auto;
+  font-size: 1em;
+  max-width: 70%;
+}
+.topbar .logo {
+  text-decoration: none;
+  font-weight: bold;
+  color: black;
+  font-size: 1.2em;
+}
+.topbar .logo span {
+  color: var(--primary-color);
+}
+.topbar nav {
+  display: none;
+}
+.topbar .container {
+  display: flex;
+  place-content: space-between;
+}
+.topbar .mobile-menu {
+  cursor: pointer;
+}
+
 a {
+  color: #444444;
+}
+
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  margin-bottom: 1em;
+}
+
+section {
+  padding: 5em 2em;
+}
+
+.about-me-description {
+  text-align: left;
+}
+.about-me-description .about-me .ananya-pic img {
+  display: block;
+  width: 40%;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  height: auto;
+  font-size: 1em;
+  max-width: 100%;
+}
+
+.technical-blog .article1 {
+  font-size: 1em;
+}
+.technical-blog .article1-pic img {
+  display: flex;
+  width: 20%;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+nav.menu-btn {
+  display: block;
+}
+
+nav {
+  position: fixed;
+  z-index: 999;
+  width: 66%;
+  right: 0;
+  top: 0;
+  background: var(--primary-color);
+  height: 100vh;
+  padding: 1em;
+}
+nav ul.aboutme {
+  margin-top: 2em;
+}
+nav li a {
+  color: white;
+  text-decoration: none;
+  display: block;
+  padding: 0.5em;
+  font-size: 1.3em;
+  text-align: left;
+}
+nav li a:hover {
+  font-weight: bold;
+}
+
+.mobile-menu-exit {
+  float: right;
+  margin: 0.5em;
+  cursor: pointer;
+}
+
+@media only screen and (min-width: 768px) {
+  .mobile-menu, .mobile-menu-exit {
+    display: none;
+  }
+  .topbar {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    place-content: space-between;
+    position: fixed;
+    top: 0;
+    padding: 1em;
+    width: 100%;
+  }
+  .topbar .logo {
     text-decoration: none;
-    color: #999;
-}
-a:hover {
-    text-decoration: underline;
-}
-h1 {
-    font-size: 3em;
-    font-family:'Helvetica', 'Arial', 'Sans-Serif';
-}
-p {
+    font-weight: bold;
+    color: black;
     font-size: 1.5em;
-    line-height: 1.4em;
-    color: #333;
-}
-footer {
-    border-top: 1px solid #d5d5d5;
-    font-size: .8em;
-}
-ul.posts {
-    margin: 20px auto 40px; 
-    font-size: 1.5em;
-}
-ul.posts li {
-    list-style: none;
-}
+    margin-top: 2.2em;
+    margin-right: 0;
+  }
+  .topbar .logo span {
+    color: var(--primary-color);
+  }
+  .topbar .container {
+    display: flex;
+    place-content: start;
+  }
+  .topbar .container nav {
+    display: flex;
+    justify-content: space-between;
+    background: none;
+    position: fixed;
+    height: auto;
+    width: 100%;
+    padding: 0;
+  }
+  .topbar .container nav ul {
+    display: flex;
+  }
+  .topbar .container nav ul.about-me {
+    margin-top: 2em;
+    margin-right: 5em;
+    margin-left: 20em;
+  }
+  .topbar .container nav ul.blog {
+    margin-top: 2em;
+    margin-left: 10em;
+    margin-right: 2em;
+  }
+  .topbar .container nav .linkedin-logo img {
+    display: block;
+    width: 30%;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    height: auto;
+    font-size: 1em;
+    max-width: 100%;
+  }
+  .topbar .container nav .github-logo img {
+    display: block;
+    width: 15%;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    height: auto;
+    font-size: 1em;
+    max-width: 70%;
+  }
+  .topbar .container nav a {
+    color: black;
+    font-size: 1em;
+    padding: 1em 1em;
+  }
+  .about-me {
+    display: flex;
+    text-align: left;
+  }
+  .about-me .ananya-pic img {
+    -o-object-fit: contain;
+       object-fit: contain;
+    margin: 3em 30em 3em 0;
+    display: flex;
+    width: 100%;
+    max-width: 100%;
+    max-height: 100%;
+  }
+  .about-me .about-me-descr {
+    margin: 2em 0 3em -15em;
+  }
+  .article1 {
+    display: flex;
+    text-align: left;
+  }
+  .article1 .article1-pic img {
+    margin: 2em 30em 3em 0;
+    width: 30%;
+    max-width: 100%;
+    max-height: 100%;
+  }
+  .article1 .article1-text {
+    margin: 2em 30em 3em -20em;
+  }
+}/*# sourceMappingURL=main.css.map */

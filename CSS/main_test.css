@@ -1,0 +1,112 @@
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 1100px;
+    margin: auto;
+    overflow: hidden;
+    padding: 0 20px;
+}
+
+.topbar {
+    background: #333;
+    color: #fff;
+    padding: 1rem 0;
+}
+
+.logo {
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+}
+
+.nav-links li {
+    padding: 0 10px;
+}
+
+.nav-links a {
+    color: #fff;
+    text-decoration: none;
+}
+
+section {
+    padding: 2rem 0;
+}
+
+h1, h2 {
+    margin-bottom: 1rem;
+}
+
+.read-more {
+    display: inline-block;
+    margin-top: 1rem;
+    color: #333;
+    text-decoration: none;
+}
+
+.about-me-description {
+    padding: 2rem 0;
+    background-color: #f8f9fa;
+}
+
+.about-me-description h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.about-me {
+    display: flex;
+    align-items: flex-start;
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.ananya-pic {
+    flex: 0 0 200px; /* Adjusted this value to make the image wider */
+}
+
+.ananya-pic img {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.about-me-descr {
+    flex: 1;
+    min-width: 0; /* Ensure the text container doesn't overflow */
+}
+
+.description {
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+    .about-me {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .ananya-pic {
+        margin-bottom: 2rem;
+    }
+
+    .about-me-descr {
+        text-align: center;
+    }
+}
+
+/* Add more styles as needed */

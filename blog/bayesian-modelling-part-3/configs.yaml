@@ -1,0 +1,49 @@
+---
+input_data_filepath:   '/Users/ananyaroy/Documents/ROY/Data/AppInstallsData/'
+output_filepath:       '/Users/ananyaroy/Documents/ROY/Data/AppInstallsData/Output/'
+
+sim_df_elements:
+    num_samples: 100 # 10000 / 1000
+    countries:
+        names: ['US','UK','India','China','Russia'] #Country names
+        probs: [0.20,0.15,0.30,0.30,0.05] #Probabilities associated with the observation coming from a particular country
+    os_device_versions:
+        ios: 
+            prob: 0.4
+            iphone:
+                prob: 0.25
+                i1.0.1: 0.03
+                i1.0.2: 0.07
+                i1.0.3: 0.15
+            ipad:
+                prob: 0.15
+                i10.0.1: 0.06
+                i10.0.2: 0.09
+        android:
+            prob: 0.6
+            samsung:
+                prob: 0.43
+                s1.1: 0.03
+                s1.2: 0.05
+                s1.3: 0.15
+                s1.4: 0.2
+            huawei:
+                prob: 0.15
+                h2.2.1: 0.08
+                h2.3:   0.07
+            nokia:
+                prob: 0.02
+                n1.1: 0.02
+    os: 
+        names: ['ios','android']
+        probs: [0.40,0.60]
+    device:
+        names: ['iphone','ipad','samsung','huawei','nokia']
+        probs: [0.25,0.15, 0.35,0.15,0.1]
+    software_version:
+        names: ['i1.0.1','i1.0.2','i1.0.3','i10.0.1','i10.0.2', 's1.1','s1.2','s1.3','s1.4','h2.2.1','h2.3','n1.1']
+        probs: [0.03,0.07,0.15, 0.06,0.09, 0.03,0.05,0.10,0.17, 0.08,0.07 ,0.1]
+    
+    save_sim_df_filepath:
+    - 'Users/ananyaroy/Documents/ROY/Data/AppInstallsData/Output/'
+...

@@ -1,0 +1,295 @@
+
+:root{
+    --primary-color: #034688;
+}
+
+body {
+    background: white;
+    margin: 60px auto;
+    width: 100%; // 80%
+}
+
+.topbar {
+    background: #9e9c9c;
+    // background: var(--primary-color);
+    justify-content: space-between;
+    padding: 1em;
+    color: var(--primary-color);
+
+    .linkedin-logo img{
+        display: block;
+        width: 40%;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        height:auto;
+        font-size: 1em;
+        max-width:100%;
+    }
+
+    .github-logo img{
+        display: block;
+        width: 20%;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        height: auto;
+        font-size: 1em;
+        max-width:70%;
+    }
+
+    .logo {
+        text-decoration: none;
+        font-weight: bold;
+        color: black;
+        font-size: 1.2em;
+
+        span {
+            color: var(--primary-color);
+        }
+    }
+
+    nav {
+        display: none;
+    }
+    
+    .container {
+        display: flex;
+        place-content: space-between;
+    }
+
+    .mobile-menu {
+        cursor: pointer;
+    }
+}
+
+a {
+    color: #444444;
+}
+
+ul {
+    list-style-type: none; 
+    margin: 0;
+    padding: 0;
+    margin-bottom: 1em;
+ }
+ 
+section {
+    padding: 5em 2em;
+}
+
+.about-me-description{
+    text-align: left;
+
+    .about-me{
+        .ananya-pic img{
+            display: block;
+            width: 40%;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            height:auto;
+            font-size: 1em;
+            max-width:100%;
+        }
+    }
+
+    // .ananya-pic{
+    //     display: flex;
+    //     margin-left: auto;
+    //     margin-right: auto;
+    //     border: 1px solid #ddd;
+    //     // border-radius: 4px;
+    //     padding: 5px;
+    //     width: 80%;
+    //     height: auto;
+    //     max-width: 50%;
+    // }
+}
+
+.technical-blog {
+    .article1{
+        font-size: 1em;
+    }
+
+    .article1-pic img{
+        display:flex;
+        width: 20%;
+        max-width:100%;
+        max-height:100%;
+    }
+}
+
+nav.menu-btn {
+    display: block;
+}
+
+nav {
+    position: fixed;
+    z-index: 999;
+    width: 66%;
+    right: 0;
+    top: 0;
+    background:var(--primary-color);
+    height: 100vh;
+    padding: 1em;
+
+    ul.aboutme {
+        margin-top: 2em;
+    }
+
+    li {
+        
+        a {
+            color: white;
+            text-decoration: none;
+            display: block;
+            padding: .5em;
+            font-size: 1.3em;
+            text-align: left;
+
+            &:hover {
+                font-weight: bold;
+            }
+        }
+    }
+}
+
+.mobile-menu-exit {
+    float: right;
+    margin: .5em;
+    cursor: pointer;
+}
+
+@media only screen and (min-width: 768px) {
+    .mobile-menu, .mobile-menu-exit {
+        display: none;
+    }
+
+    .topbar {
+        display: grid;
+        grid-template-columns: auto auto auto;
+        // justify-content: unset;
+        place-content: space-between;
+        position:fixed;
+        top: 0;
+        padding: 1em;
+        // padding: 20px;
+        width: 100%;
+
+        .logo {
+            text-decoration: none;
+            font-weight: bold;
+            color: black;
+            font-size: 1.5em;
+            margin-top:2.2em;
+            margin-right: 0;
+    
+            span {
+                color: var(--primary-color);
+            }
+        }
+        .container {
+            display: flex;
+            place-content: start;
+        }
+
+    }
+
+    .topbar .container nav {
+        display: flex;
+        justify-content: space-between;
+        background: none;
+        position: fixed;
+        height: auto;
+        width: 100%;
+        padding: 0;
+
+        ul {
+            display: flex;
+        }
+
+        ul.about-me{
+            margin-top: 2em;
+            margin-right: 5em;
+            margin-left: 20em;
+        }
+        ul.blog{
+            margin-top: 2em;
+            margin-left: 10em;
+            margin-right: 2em;
+        }
+        .linkedin-logo img{
+            display: block;
+            width: 30%;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            height:auto;
+            font-size: 1em;
+            max-width:100%;
+        }
+    
+        .github-logo img{
+            display: block;
+            width: 15%;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            height: auto;
+            font-size: 1em;
+            max-width:70%;
+        }
+
+        a {
+            color: black;
+            font-size: 1em;
+            padding: 1em 1em;
+        }
+    }
+
+    .about-me{
+        display: flex; 
+        // justify-content: space-between;
+        text-align: left;
+
+        .ananya-pic img{
+            object-fit: contain; // cover , fill, contain
+            // margin-top: 3em;
+            // margin-right: 30em;
+            // margin-left: 0;
+            // margin-bottom: 3em;
+            margin: 3em 30em 3em 0; // top right bottom left - change the right dim
+            display: flex;
+            width: 100%;
+            // border: 1px solid #ddd;
+            // border-radius: 4px;
+            // height: auto;
+            // font-size: 1em;
+            max-width:100%;
+            max-height:100%;
+        }
+
+        .about-me-descr{
+            margin: 2em 0 3em -15em; // top right bottom left - change the left dim
+        }
+    }
+
+    .article1{
+        display: flex;
+        text-align:left;
+
+        .article1-pic img{
+            // object-fit: contain;
+            // display:flex;
+            // margin: 3em 3em 3em 0;
+            margin: 2em 30em 3em 0; 
+            width: 30%;
+            max-width:100%;
+            max-height:100%;
+        }
+
+        .article1-text{
+            margin:  2em 30em 3em -20em;
+            //
+            // margin: 2em 30em 3em 2em; // top right bottom left - change the left dim
+        }
+    }
+
+
+}

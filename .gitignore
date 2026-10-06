@@ -1,0 +1,37 @@
+# OS / editor / tool noise
+.DS_Store
+.claude/
+__pycache__/
+*.pyc
+
+# Jupyter checkpoints (the folders are named both ways in this repo)
+.ipynb_checkpoints/
+ipynb_checkpoints/
+
+# Quarto build cache (the rendered HTML next to each post IS committed)
+.quarto/
+
+# Local configs: contain paths to folders on this machine
+# configs.yaml
+
+# Design notes and old copies of the homepage
+design_handoff_portfolio_site/
+index_ori.html
+index_original.html
+index_test.html
+
+# Old notebook exports in the AWS post folder
+blog/aws_data_pipeline/demo_test_pipeline*.html
+
+# Images nothing on the site uses.
+images/fractal.PNG
+images/ivt_math.PNG
+images/LinkedIn-Logo.png
+images/github-mark.png
+images/github-mark.svg
+images/icons8-github.svg
+images/icons8-linkedin.svg
+images/exit.svg
+images/menu.svg
+blog/bayesian-modelling-part-3/stan_model_output.png
+blog/aws_data_pipeline/ami_image_description.PNG
